@@ -1,0 +1,38 @@
+{% extends "base_template.html" %}
+
+
+{% block header %}{% endblock%}
+
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card-group">
+        <div class="card p-4">
+          <div class="card-body">
+            <form action="" method="post" name="login">
+              <h1>Логин</h1>
+              <p class="text-muted">Введите идентификационный код:</p>
+              <div class="input-group mb-4">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                    <i class="icon-lock">Пароль?</i>
+                  </span>
+                </div>
+                <input class="form-control" type="password" name='pass' placeholder="Сизам!">
+              </div>
+              <div class="row">
+                <div class="col-6">
+                  <button class="btn btn-primary px-4" type="submit">Войти</button>
+                </div>
+                <div class="col-6 text-right">
+                  <button class="btn btn-link px-0" type="button">Нет пароля?</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %} 

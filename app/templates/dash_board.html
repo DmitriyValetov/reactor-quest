@@ -1,0 +1,35 @@
+{% extends "base_template.html" %}
+
+
+{% block header %}{% endblock%}
+
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card-group">
+        <div class="card p-4">
+          <div class="card-body">
+            <h1>Ваши действия?</h1>
+            <p class="text-muted">У вас осталось <span id='od_span'>10<span> очко(в) действия</p>
+                <div class="row">
+                    <button class="btn btn-block btn-success my-1" type="button">Убежать (0 ОД)</button>
+                </div>
+                <div class="row">
+                    <button class="btn btn-block btn-success my-1" type="button">АЗ-5 (100 ОД)</button>
+                </div>
+                <div class="row">
+                    <button class="btn btn-block btn-success my-1" type="button">Сбросить стержень (5 ОД)</button>
+                </div>
+                <div class="row">
+                    <button class="btn btn-block btn-success my-1" type="button">Напиться на рабочем месте (+5 ОД)</button>
+                </div>
+                <div class="row">
+                    <button class="btn btn-block btn-secondary my-1" type="button">Вернуться в основное меню</button>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

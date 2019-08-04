@@ -1,0 +1,28 @@
+{% extends "base_template.html" %}
+
+
+{% block title %}Admin page{% endblock %}
+
+{% block header %}{% endblock%}
+
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card-group">
+        <div class="card p-4">
+          <div class="card-body">
+            <h1>Admin page</h1>
+            <div class='row' id='teams_aps'></div>
+            <div class="row">
+                <button class="btn btn-block btn-success my-1" type="button">Полный рестарт</button>
+            </div>
+            <div class="row">
+                <button class="btn btn-block btn-success my-1" type="button">Редактировать очки команды</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
