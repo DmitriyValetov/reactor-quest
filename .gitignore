@@ -2,3 +2,6 @@
 *.bak
 __pycache__/
 *.txt
+*.db
+.*
+*.ipynb

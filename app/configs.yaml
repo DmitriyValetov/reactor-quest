@@ -6,6 +6,22 @@ auth:
 init_ap: 10
 promo:
   hesouam: 10
+promos:
+  govs:
+  - ap: 10
+    name: beer
+  - ap: 100
+    name: bee
+  staff:
+  - ap: 10
+    name: hesouam
+  - ap: 100
+    name: love
+  terrors:
+  - ap: 11
+    name: ibrae
+  - ap: 12
+    name: mipt
 secret: ahalaymahalay
 teams:
 - govs
