@@ -75,7 +75,7 @@ def promo_is_used(promo_name, team_name):
     promo_used = None
     promos = session.query(Team).filter(Team.name == team_name).one().promos
     for p in promos:
-        if p['name'] == promo_name:
+        if p.name == promo_name:
             if p.status == 'off':
                 promo_used = False
             else:
@@ -90,8 +90,9 @@ def increment_ap(team_name, incr_ap):
     engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
     Session = sessionmaker(bind=engine)
     session = Session()
-    team_obj = session.query(Team).filter_by(name=team_name).get(1)
+    team_obj = session.query(Team).filter_by(name=team_name).first()
     team_obj.ap += incr_ap
+    session.add(team_obj)
     session.commit()
     session.close()
     engine.dispose()
@@ -105,19 +106,38 @@ def toggle_promo(promo_name, team_name):
     Session = sessionmaker(bind=engine)
     session = Session()
 
+    ap_value = None
     promo_toggled = False
     promos = session.query(Team).filter(Team.name == team_name).one().promos
     for p in promos:
-        if p['name'] == promo_name:
+        if p.name == promo_name:
             if p.status == 'off':
                 p.status = 'on'
                 promo_toggled = True
+                ap_value = p.ap
                 session.add(p)
 
     session.commit() # no changes!
     session.close()
     engine.dispose()
-    return promo_toggled
+    return promo_toggled, ap_value
+
+def get_team_ap(team_name):
+    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    team_ap = None
+    try:
+        team_obj = session.query(Team).filter_by(name=team_name).first()
+        team_ap = team_obj.ap
+    except BaseException as e:
+        raise e
+    finally:
+        # session.add(team_obj)
+        # session.commit() # no changes !!!
+        session.close()
+        engine.dispose()
+    return team_ap
 
 def init(app):
     """

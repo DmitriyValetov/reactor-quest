@@ -95,13 +95,13 @@ def promo():
     """
     if request.method == 'POST' and 'promo' in request.form:
         # promo exists:
-        if str(request.form['promo']) in current_app.configs['promo']:
-            # check promo code to be used already
-            if db.check_Promoact(request.form['promo'], session['login']):
-                db.increment_ap(session['login'], current_app.configs['promo'][request.form['promo']])
-                db.add_PromoAct(request.form['promo'], session['login'])
+        if not db.promo_is_used(request.form['promo'], session['login']):
+            success, ap_value = db.toggle_promo(request.form['promo'], session['login'])
+            if success:
+                db.increment_ap(session['login'], ap_value)
 
-    return render_template('promo.html')
+    team_ap = db.get_team_ap(session['login'])
+    return render_template('promo.html', team_name=session['login'], team_ap=team_ap)
 
 @reactor_blueprint.route('/dash_board', methods=['GET', 'POST'])
 def dash_board():
