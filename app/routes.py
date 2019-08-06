@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for, session
 from flask import Blueprint
-from flask import current_app
+from flask import current_app, send_file
 import hashlib
 import json
 from . import db
@@ -20,12 +20,12 @@ def compare_passwords(real_hash, income_pass):
 
 @reactor_blueprint.before_request
 def before_request():
+    print('before-request entered before: ', request.endpoint)
     if not( ('login' in session) and ('pass' in session) and compare_passwords(str(current_app.configs['auth'][session['login']]), session['pass']) ):
         if 'login' in session: del session['login']
         if 'pass' in session: del session['pass']
         if request.endpoint != 'reactor.login':
             return redirect(url_for('reactor.login'))
-    print('Auth passed: {} at {} page'.format(session['login'], request.endpoint))
 
 @reactor_blueprint.route('/', methods=['GET', 'POST'])
 def login():
@@ -34,7 +34,10 @@ def login():
     """
     print('login page entered')
     if ('login' in session) and ('pass' in session) and compare_passwords(str(current_app.configs['auth'][session['login']]), session['pass']):
-        return redirect(url_for('reactor.main'), code=302)
+        if session['login'] == 'admin':
+            return redirect(url_for('reactor.admin'))
+        else:
+            return redirect(url_for('reactor.main'), code=302)
     else:
         if 'login' in session: del session['login']
         if 'pass' in session: del session['pass']
@@ -72,7 +75,9 @@ def main():
         elif action == 'todashboard':
             return redirect(url_for('reactor.dash_board'))
 
-    return render_template('main.html')
+    team_name = session['login']
+    team_ap = db.get_team_ap(session['login'])
+    return render_template('main.html', team_name=team_name, team_ap=team_ap)
 
 @reactor_blueprint.route('/admin', methods=['GET', 'POST'])
 def admin():
@@ -88,20 +93,27 @@ def controls():
     """
     return render_template('controls.html')
 
-@reactor_blueprint.route('/promo', methods=['GET', 'POST'])
-def promo():
+# @reactor_blueprint.route('/promo', methods=['GET', 'POST'])
+# def promo():
     """
     main page
     """
     if request.method == 'POST' and 'promo' in request.form:
         # promo exists:
-        if not db.promo_is_used(request.form['promo'], session['login']):
+        if not db.promo_was_used(request.form['promo'], session['login']):
             success, ap_value = db.toggle_promo(request.form['promo'], session['login'])
             if success:
                 db.increment_ap(session['login'], ap_value)
 
     team_ap = db.get_team_ap(session['login'])
     return render_template('promo.html', team_name=session['login'], team_ap=team_ap)
+
+@reactor_blueprint.route('/promo', methods=['GET', 'POST'])
+def promo():
+    """
+    main page
+    """
+    return render_template('promo.html', team_name=session['login'])
 
 @reactor_blueprint.route('/dash_board', methods=['GET', 'POST'])
 def dash_board():
@@ -110,6 +122,16 @@ def dash_board():
     """
     return render_template('dash_board.html')
 
+
+@reactor_blueprint.route('/test_page', methods=['GET', 'POST'])
+def test_page():
+    # return send_file('./templates/test.html') # ok
+    return render_template('test_page.html') # fail
+
+@reactor_blueprint.route('/test_modal', methods=['GET', 'POST'])
+def test_modal():
+    # return send_file('./templates/test.html') # ok
+    return render_template('test_modal.html') # fail
 
 #===================================================================================
 #==========================   for ajax requests   ==================================
@@ -121,3 +143,56 @@ def configs():
     main page
     """
     return json.dumps(current_app.configs)
+
+@reactor_blueprint.route('/restore_promos', methods=['GET', 'POST'])
+def restore_promos():
+    db.restore_promos()
+    return json.dumps({'status': 200, 'data': 'Success with: setting `off` status to all promos'})
+
+
+@reactor_blueprint.route('/null_teams_aps', methods=['GET', 'POST'])
+def null_teams_aps():
+    db.null_teams_aps()
+    return  json.dumps({'status': 200, 'data': 'Success with: setting 0 ap to all teams.'})
+
+
+@reactor_blueprint.route('ajax/toggle_promo', methods=['GET'])
+def toggle_promo():
+    """
+    TODO - add time cooldown for 1 minute
+    """
+    if 'promo' not in request.args:
+        return json.dumps({'status': 400, 'data': 'No promo key/value in request.'})
+
+    team_name = session['login']
+    responce_msg = None
+    responce_status = 200
+    team_ap_is = db.get_team_ap(team_name)
+
+    promo_code = request.args['promo']
+    if not db.promo_exists(promo_code, team_name):
+        responce_msg = "Промо {} не существует.".format(promo_code)
+    elif not db.promo_was_used(promo_code, team_name):
+        if db.team_not_in_cooldown(team_name):
+            success, ap_value = db.toggle_promo(promo_code, team_name)
+            if success:
+                db.increment_ap(team_name, ap_value)
+                team_ap_is = db.get_team_ap(team_name)
+                responce_msg = "Промо активировано. Текущие очки команды {} - {}".format(team_name, team_ap_is)
+        else:
+            responce_msg = "Пожалуйста, попробуйте через минуту. Сервер горит."
+    else:
+        responce_msg = "Это промо уже было активировано вашей командой)"
+
+    return  json.dumps({'status': responce_status, 'data': responce_msg, 'current_ap': team_ap_is})
+
+
+@reactor_blueprint.route('/info', methods=['GET'])
+def get_teams_promos_info():
+    return db.get_info()
+
+@reactor_blueprint.route('ajax/team_ap', methods=['GET'])
+def get_team_ap():
+    # team_ap = db.get_team_ap(session['login'])        # ok, but I want to excersice with 
+    team_ap = db.get_team_ap(request.args['team_name']) # get request and args
+    return json.dumps({'status': 200, 'data': {'team_ap': team_ap}})

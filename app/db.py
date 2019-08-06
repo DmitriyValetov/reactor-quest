@@ -1,8 +1,9 @@
-from sqlalchemy import Table, Column, Integer, ForeignKey, String, Float
+from sqlalchemy import Table, Column, Integer, ForeignKey, String, Float, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+import datetime
 import sqlite3
 import json
 import os
@@ -29,6 +30,7 @@ class Team(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, unique=True)
     ap = Column(Integer) # action points
+    last_cast_time = Column(DateTime)
     promos = relationship('Promo')
     def __repr__(self):
         return "Team ({} : {} : {})".format(self.id, self.name, self.ap)
@@ -51,7 +53,7 @@ def get_info():
     engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
     Session = sessionmaker(bind=engine)
     session = Session()
-    data = {'promo':[], 'teams':[]}
+    data = {'promos':[], 'teams':[]}
     for team in session.query(Team).all():
         data['teams'].append(str(team))
     for promo in session.query(Promo).all():
@@ -61,8 +63,29 @@ def get_info():
     engine.dispose()
     return json.dumps(data)
 
+def promo_exists(promo_code, team_name):
+    """
+    None - promo is no suitable for this comand
+    False - promo not used
+    True - promo already used
+    """
+    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
-def promo_is_used(promo_name, team_name):
+    promo = (session.query(Promo)
+                    .join(Team)
+                    .filter(Team.id == Promo.team_id)
+                    .filter(Team.name == team_name)
+                    .filter(Promo.name == promo_code)
+                    .first())
+    
+    # session.commit() # no changes!
+    session.close()
+    engine.dispose()
+    return promo is not None
+
+def promo_was_used(promo_name, team_name):
     """
     None - promo is no suitable for this comand
     False - promo not used
@@ -97,6 +120,23 @@ def increment_ap(team_name, incr_ap):
     session.close()
     engine.dispose()
 
+def team_not_in_cooldown(team_name):
+    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    try:                 
+        answer = False    
+        team = session.query(Team).filter_by(name=team_name).first()
+        if team.last_cast_time is None or datetime.datetime.today() - team.last_cast_time > datetime.timedelta(0, 1*60, 0):
+            answer = True
+    except BaseException as e:
+        raise e
+    finally:
+        # session.commit()
+        session.close()
+        engine.dispose()
+    return answer
+
 def toggle_promo(promo_name, team_name):
     """
     False - toggle failed
@@ -108,16 +148,18 @@ def toggle_promo(promo_name, team_name):
 
     ap_value = None
     promo_toggled = False
-    promos = session.query(Team).filter(Team.name == team_name).one().promos
+    team = session.query(Team).filter(Team.name == team_name).first()
+    promos = team.promos
     for p in promos:
         if p.name == promo_name:
             if p.status == 'off':
                 p.status = 'on'
+                team.last_cast_time = datetime.datetime.today()
                 promo_toggled = True
                 ap_value = p.ap
                 session.add(p)
 
-    session.commit() # no changes!
+    session.commit()
     session.close()
     engine.dispose()
     return promo_toggled, ap_value
@@ -138,6 +180,28 @@ def get_team_ap(team_name):
         session.close()
         engine.dispose()
     return team_ap
+
+def restore_promos():
+    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    for p in session.query(Promo).all():
+        p.status = 'off'
+        session.add(p)
+    session.commit()
+    session.close()
+    engine.dispose()
+
+def null_teams_aps():
+    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    for t in session.query(Team).all():
+        t.ap = 0
+        session.add(t)
+    session.commit()
+    session.close()
+    engine.dispose()
 
 def init(app):
     """
