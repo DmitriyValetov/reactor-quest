@@ -89,7 +89,11 @@
           team_ap: '-?-',
           showModal: false,
           modal_header: 'empty header',
-          modal_body: 'empty body'
+          modal_body: 'empty body',
+          promo_code: ''
+        },
+        methods: {
+          toggle_promo: toggle_promo
         }
       }); 
 
@@ -98,16 +102,16 @@
             success=function(responce){ app.team_ap = responce.data.team_ap;}, 
             dataType='json'); // to auto json parse
 
-      $('#send_promo_bttn').on('click', function(){
-        if($('#promo_field').val().length == 0){
+      function toggle_promo(){
+        if(app.promo_code.length == 0){
           showModal('Ошибка', 'Вы не ввели промо код, нечего отправлять.');
           return false;
         }
         $.get(url='ajax/toggle_promo', 
-            data={'promo': $('#promo_field').val()}, 
+            data={'promo': app.promo_code}, 
             success=function(responce){ showModal('Ответ сервера', responce.data); }, 
             dataType='json'); // to auto json parse
-      });
+      };
 
       function showModal(header, body){
         app.modal_header = header;
@@ -118,7 +122,7 @@
       document.getElementById("promo_field").addEventListener("keyup", function(event) {
         if (event.keyCode === 13) {
           event.preventDefault();
-          document.getElementById("send_promo_bttn").click();
+          app.toggle_promo();
         }
       });
     };
@@ -145,11 +149,11 @@
                     <i class="icon-lock">Промокод: </i>
                   </span>
                 </div>
-                <input class="form-control" type="text" name='promo' id='promo_field'>
+                <input class="form-control" type="text" name='promo' id='promo_field' v-model='promo_code'>
               </div>
               <div class='row justify-content-between'>
                 <div class="col-4">
-                  <button class="btn btn-primary px-4" type='button' id='send_promo_bttn'>Ввод</button>
+                  <button class="btn btn-primary px-4" type='button' v-on:click='toggle_promo'>Ввод</button>
                 </div>
                 <div class="col-4">
                   <div class="float-right">
