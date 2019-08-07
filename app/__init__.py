@@ -12,6 +12,7 @@ def load_yaml(path):
         data = yaml.load(f)
     return data
 
+
 def init_app(app):
     """
     1) load keys

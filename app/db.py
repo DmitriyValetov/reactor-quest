@@ -11,6 +11,9 @@ import os
 root = os.path.split(__file__)[0]
 Base = declarative_base()
 
+def make_engine():
+    return create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+
 class State(Base):
     __tablename__ = 'states'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -50,7 +53,7 @@ def get_info():
     """
     returns some db info
     """
-    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    engine = make_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
     data = {'promos':[], 'teams':[]}
@@ -69,7 +72,7 @@ def promo_exists(promo_code, team_name):
     False - promo not used
     True - promo already used
     """
-    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    engine = make_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -91,7 +94,7 @@ def promo_was_used(promo_name, team_name):
     False - promo not used
     True - promo already used
     """
-    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    engine = make_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -110,7 +113,7 @@ def promo_was_used(promo_name, team_name):
     return promo_used
 
 def increment_ap(team_name, incr_ap):
-    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    engine = make_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
     team_obj = session.query(Team).filter_by(name=team_name).first()
@@ -121,7 +124,7 @@ def increment_ap(team_name, incr_ap):
     engine.dispose()
 
 def team_not_in_cooldown(team_name):
-    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    engine = make_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
     try:                 
@@ -142,7 +145,7 @@ def toggle_promo(promo_name, team_name):
     False - toggle failed
     True - toggle success
     """
-    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    engine = make_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -165,7 +168,7 @@ def toggle_promo(promo_name, team_name):
     return promo_toggled, ap_value
 
 def get_team_ap(team_name):
-    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    engine = make_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
     team_ap = None
@@ -182,7 +185,7 @@ def get_team_ap(team_name):
     return team_ap
 
 def restore_promos():
-    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    engine = make_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
     for p in session.query(Promo).all():
@@ -193,7 +196,7 @@ def restore_promos():
     engine.dispose()
 
 def null_teams_aps():
-    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    engine = make_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
     for t in session.query(Team).all():
@@ -207,7 +210,7 @@ def init(app):
     """
     Initialize db sheme
     """
-    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    engine = make_engine()
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -215,16 +218,16 @@ def init(app):
         team_exists = session.query(Team.id).filter_by(name=team_name).scalar() is not None
         if not(team_exists):
             new_team = Team(name=team_name, ap=app.configs['init_ap'])
-            session.add(new_team)
             if team_name in app.configs['promos']:
                 for promo_pack in app.configs['promos'][team_name]:
                     new_team.promos.append(Promo(name=promo_pack['name'], status='off', ap=promo_pack['ap']))
+            session.add(new_team)
     session.commit()
     session.close()
     engine.dispose()
     
 def clear():
-    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    engine = make_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
     session.Event.query().delete()
@@ -234,15 +237,25 @@ def clear():
     engine.dispose()
     
 def drop_tables():
-    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    engine = make_engine()
     Event.__table__.drop(engine)
     State.__table__.drop(engine)
     Team.__table__.drop(engine)
     engine.dispose()
 
 def init_solutons_db_sheme():
-    engine = create_engine('sqlite:///{}'.format(os.path.join(root, 'reactor.db')))
+    engine = make_engine()
     Base.metadata.create_all(engine)
+    engine.dispose()
+
+def add_action_to_db(name, work, source):
+    engine = make_engine()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    new_event = Event(data=json.dumps({'name': name, 'work': work, 'source': source}))
+    session.add(new_event)
+    session.commit()
+    session.close()
     engine.dispose()
 
 # def target_data_db_func(root):

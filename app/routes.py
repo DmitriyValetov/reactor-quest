@@ -79,22 +79,7 @@ def controls():
     """
     main page
     """
-    return render_template('controls.html')
-
-# @reactor_blueprint.route('/promo', methods=['GET', 'POST'])
-# def promo():
-    """
-    main page
-    """
-    if request.method == 'POST' and 'promo' in request.form:
-        # promo exists:
-        if not db.promo_was_used(request.form['promo'], session['login']):
-            success, ap_value = db.toggle_promo(request.form['promo'], session['login'])
-            if success:
-                db.increment_ap(session['login'], ap_value)
-
-    team_ap = db.get_team_ap(session['login'])
-    return render_template('promo.html', team_name=session['login'], team_ap=team_ap)
+    return render_template('controls.html', team_name=session['login'])
 
 @reactor_blueprint.route('/promo', methods=['GET', 'POST'])
 def promo():
@@ -109,17 +94,6 @@ def dash_board():
     main page
     """
     return render_template('dash_board.html')
-
-
-@reactor_blueprint.route('/test_page', methods=['GET', 'POST'])
-def test_page():
-    # return send_file('./templates/test.html') # ok
-    return render_template('test_page.html') # fail
-
-@reactor_blueprint.route('/test_modal', methods=['GET', 'POST'])
-def test_modal():
-    # return send_file('./templates/test.html') # ok
-    return render_template('test_modal.html') # fail
 
 #===================================================================================
 #==========================   for ajax requests   ==================================
@@ -170,7 +144,7 @@ def toggle_promo():
         else:
             responce_msg = "Пожалуйста, попробуйте через минуту. Сервер горит."
     else:
-        responce_msg = "Это промо уже было активировано вашей командой)"
+        responce_msg = "Это промо уже было активировано вашей командой :)"
 
     return  json.dumps({'status': responce_status, 'data': responce_msg, 'current_ap': team_ap_is})
 
@@ -210,3 +184,38 @@ def ajax_login():
             return_dict = {'status': 452, 'data': 'Нет команды с таким паролем. Попробуйте ещё раз меня хакнуть.'}
 
     return json.dumps(return_dict)
+
+@reactor_blueprint.route('ajax/available_actions', methods=['GET'])
+def available_actions():
+    if 'team_name' not in request.args:
+        return json.dumps({'status': 400, 'data': 'No team_name key/value in request.'})
+
+    team_name = request.args['team_name']
+    actions = filter(lambda x: x['access'] is None or team_name in x['access'], current_app.configs['actions'])
+    actions = map(lambda x: {'name': x['name'], 'cost': x['cost']}, actions)
+    actions = list(actions)
+    return json.dumps({'status': 200, 'data': {'actions': actions}})
+
+@reactor_blueprint.route('ajax/push_action', methods=['POST'])
+def push_team_action():
+    print(request.form)
+    if 'action_name' not in request.form or 'team_name' not in request.form:
+        return json.dumps({'status': 400, 'data': 'No team_name or action_name key/value in request.'})
+
+    action_name = request.form['action_name']
+    team_name = request.form['team_name']
+    team_ap = db.get_team_ap(team_name) # get request and args
+    found_similar = list(filter(lambda x: x['name'] == action_name, current_app.configs['actions']))
+    action_exists = len(found_similar) > 0
+    found_action = found_similar[0]
+    if not action_exists:
+        return json.dumps({'status': 452, 'data': {'header': 'ОшЫбка', 'body': 'Нет такого действия({}) в списке на сервере... Ты меня хакаешь?'.format(action_name)}})
+    if found_action['access'] is not None and team_name not in found_action['access']:
+        return json.dumps({'status': 452, 'data': {'header': 'ОшЫбка', 'body': 'Эта команда({}) не имеет права на это действие({})... Ты меня хакаешь?'.format(team_name, action_name)}})
+    if team_ap < found_action['cost']:
+        return json.dumps({'status': 452, 'data': {'header': 'ОшЫбка', 'body': 'У этой команды({}) не хватает очков на это действие({})... Ты меня хакаешь?'.format(team_name, action_name)}})
+    
+    db.increment_ap(team_name, -found_action['cost'])
+    db.add_action_to_db(name=action_name, work=found_action['work'], source=team_name)
+
+    return json.dumps({'status': 200, 'data': {'header': 'Успешно!', 'body': '{} задействовало "{}"!'.format(team_name, action_name)}})
