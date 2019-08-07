@@ -5,6 +5,14 @@ import hashlib
 import json
 from . import db
 
+no_login_check_routes = [
+    'reactor.get_teams_promos_info', # /info
+    'reactor.null_teams_aps',        # /null_teams_aps
+    'reactor.restore_promos',        # /restore_promos
+    'reactor.configs',               # /configs
+    'reactor.ajax_login'
+]
+
 
 reactor_blueprint = Blueprint(
     name = 'reactor',
@@ -21,6 +29,8 @@ def compare_passwords(real_hash, income_pass):
 @reactor_blueprint.before_request
 def before_request():
     print('before-request entered before: ', request.endpoint)
+    if request.endpoint in no_login_check_routes:
+        return # login unnecessary
     if not( ('login' in session) and ('pass' in session) and compare_passwords(str(current_app.configs['auth'][session['login']]), session['pass']) ):
         if 'login' in session: del session['login']
         if 'pass' in session: del session['pass']
@@ -196,3 +206,29 @@ def get_team_ap():
     # team_ap = db.get_team_ap(session['login'])        # ok, but I want to excersice with 
     team_ap = db.get_team_ap(request.args['team_name']) # get request and args
     return json.dumps({'status': 200, 'data': {'team_ap': team_ap}})
+
+@reactor_blueprint.route('ajax/login', methods=['POST'])
+def ajax_login():
+    """
+    1) is password in the request.form?
+    2) if it matches to one in the configs with salt and been hashed (all passwords are unique, lol):
+            2.1) add to session the login
+            2.2) return success (client will try to go enter /main page)
+        else:
+            2.3) return fail
+    """
+    if 'password' not in request.form:
+        return json.dumps({'status': 400, 'data': 'No pass key in submitted form'})
+
+    return_dict = {}
+    password = request.form['password']
+    for role in current_app.configs['auth'].keys():
+        if compare_passwords(str(current_app.configs['auth'][role]), password):
+            session['login'] = role
+            session['pass'] = password
+            return_dict = {'status': 200, 'data': 'Вход упешен. Ваша команда: {}'.format(session['login'])}
+            break
+        else:
+            return_dict = {'status': 452, 'data': 'Нет команды с таким паролем. Попробуйте ещё раз меня хакнуть.'}
+
+    return json.dumps(return_dict)
