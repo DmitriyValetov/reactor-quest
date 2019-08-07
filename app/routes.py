@@ -42,28 +42,6 @@ def login():
     """
     login page
     """
-    print('login page entered')
-    if ('login' in session) and ('pass' in session) and compare_passwords(str(current_app.configs['auth'][session['login']]), session['pass']):
-        if session['login'] == 'admin':
-            return redirect(url_for('reactor.admin'))
-        else:
-            return redirect(url_for('reactor.main'), code=302)
-    else:
-        if 'login' in session: del session['login']
-        if 'pass' in session: del session['pass']
-
-
-    # check login
-    if request.method == 'POST' and 'pass' in request.form:
-        for role in current_app.configs['auth'].keys():
-            if compare_passwords(current_app.configs['auth'][role], request.form['pass']):
-                session['login'] = role
-                session['pass'] = request.form['pass']
-                if role == 'admin':
-                    return redirect(url_for('reactor.admin'), code=302)  
-                return redirect(url_for('reactor.main'), code=302)
-
-    # return redirect(url_for('reactor.main'), code=302)
     return render_template('login.html')
 
 
