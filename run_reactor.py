@@ -8,4 +8,4 @@ if __name__ == '__main__':
         cfg = yaml.load(f, Loader=yaml.FullLoader)
     pprint(cfg)
     r = Reactor(**cfg['reactor'])
-    r.run_db(**cfg['run'])
+    r.run(**cfg['run'])

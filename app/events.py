@@ -112,10 +112,10 @@ factory = {
 }
 
 staff_factory = {
-    # 'scram': scram,
-    # 'rod_up': rod_up,
+    'scram': scram,
+    'rod_up': rod_up,
     'rod_down': rod_down,
-    # 'pump_up': pump_up,
+    'pump_up': pump_up,
     'pump_down': pump_down,
     'boron': boron
 }

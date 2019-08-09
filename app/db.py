@@ -20,7 +20,7 @@ class State(Base):
     data = Column(String)
     def __repr__(self):
         return "State ({} : {} : {})".format(self.id, self.name, self.ap)
-        
+
 class Event(Base):
     __tablename__ = 'events'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -82,7 +82,7 @@ def promo_exists(promo_code, team_name):
                     .filter(Team.name == team_name)
                     .filter(Promo.name == promo_code)
                     .first())
-    
+
     # session.commit() # no changes!
     session.close()
     engine.dispose()
@@ -127,8 +127,8 @@ def team_not_in_cooldown(team_name):
     engine = make_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
-    try:                 
-        answer = False    
+    try:
+        answer = False
         team = session.query(Team).filter_by(name=team_name).first()
         if team.last_cast_time is None or datetime.datetime.today() - team.last_cast_time > datetime.timedelta(0, 1*60, 0):
             answer = True
@@ -225,7 +225,7 @@ def init(app):
     session.commit()
     session.close()
     engine.dispose()
-    
+
 def clear():
     engine = make_engine()
     Session = sessionmaker(bind=engine)
@@ -235,7 +235,7 @@ def clear():
     session.Team.query().delete()
     session.close()
     engine.dispose()
-    
+
 def drop_tables():
     engine = make_engine()
     Event.__table__.drop(engine)
@@ -252,7 +252,9 @@ def add_action_to_db(name, work, source):
     engine = make_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
-    new_event = Event(data=json.dumps({'name': name, 'work': work, 'source': source}))
+    timestamp = datetime.datetime.utcnow().isoformat()
+    new_event = Event(data=json.dumps({'name': name, 'work': work,
+                                       'source': source, 'timestamp': timestamp}))
     session.add(new_event)
     session.commit()
     session.close()

@@ -1,12 +1,13 @@
 reactor:
   step: 5  # state update period in seconds
-  work: 1000  # reactor working time in steps
+  work: 100000  # reactor working time in steps
   chance_rate: 0.05  # boom chance rate per step (for abnormal reactor states 100+)
   rate_factor: 1  # rate of change reactor rate (determined manually)
 run:
-  db: app/reactor.db  # path to db
+  dump_path: app/reactor.db  # path to db
   plot: yes  # plot reactor state
   simulate: yes  # simulate teams actions
-  simulate_teams: [govs]  # which teams to simulate (null - simulate all, [] - no one)
-  reset_db: yes  # reset db before or start from the last saved state
+  simulate_teams: null # which teams to simulate (null - simulate all, [] - no one)
+  simulate_strats: ['staff_1', 'terrors_1', 'govs_1']  # teams strategies
+  reset: yes  # reset db before or start from the last saved state
   last_dump: no  # dump only last step (for testing, don't use it during the game)

@@ -86,22 +86,22 @@ auth:
   terrors: 49acf48595297df5fe5a31a5865c0d4f31c5c18e1c388b5df3bb5cee7f14195402c478e0157fdef3de1d2be9fbe8302a79e7c5135dc4507e32853a28d981225b
 init_ap: 0
 promo:
-  hesouam: 10
+  hesouam: 1000
 promos:
   govs:
-  - ap: 10
+  - ap: 1000
     name: beer
-  - ap: 100
+  - ap: 1000
     name: bee
   staff:
-  - ap: 10
-    name: hesouam
   - ap: 100
+    name: hesouam
+  - ap: 1000
     name: love
   terrors:
-  - ap: 11
+  - ap: 1000
     name: ibrae
-  - ap: 100
+  - ap: 1000
     name: mipt
 secret: ahalaymahalay
 teams:
