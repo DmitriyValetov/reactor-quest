@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 import datetime
 import sqlite3
 import json
+import yaml
 import os
 
 root = os.path.split(__file__)[0]
@@ -19,7 +20,7 @@ class State(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     data = Column(String)
     def __repr__(self):
-        return "State ({} : {} : {})".format(self.id, self.name, self.ap)
+        return "State ({} : {})".format(self.id, self.data)
 
 class Event(Base):
     __tablename__ = 'events'
@@ -259,6 +260,25 @@ def add_action_to_db(name, work, source):
     session.commit()
     session.close()
     engine.dispose()
+
+def get_stats_by_parameter_name(parameter_name):
+    """
+    extract state data from db by parameter_name  
+    """
+    engine = make_engine()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    data = {'x':[], 'y':[]}
+    # for i, state in enumerate(session.query(State).all()[-6:]):
+    limit = 6
+    for i, state in enumerate(session.query(State).order_by(State.id.desc()).limit(limit)):
+        state_dict = yaml.load(state.data)
+        data['x'].append(i*state_dict['step'])
+        data['y'].append(state_dict[parameter_name])
+    data['y'].sort(reverse=True)
+    session.close()
+    engine.dispose()
+    return data
 
 # def target_data_db_func(root):
 #     engine = create_engine('sqlite:///{}'.format(os.path.join(root, "solutions.sqlite")), echo=True)

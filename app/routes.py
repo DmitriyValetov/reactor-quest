@@ -219,3 +219,13 @@ def push_team_action():
     db.add_action_to_db(name=action_name, work=found_action['work'], source=team_name)
 
     return json.dumps({'status': 200, 'data': {'header': 'Успешно!', 'body': '{} задействовало "{}"!'.format(team_name, action_name)}})
+
+
+@reactor_blueprint.route('ajax/get_stats', methods=['GET'])
+def get_stats():
+    if 'parameter_name' not in request.args:
+        return json.dumps({'status': 400, 'data': 'No parameter_name key/value in request.'})
+    # data = {'x': [1,2,3], 'y': [1, 10, 100]}
+    parameter_name = request.args['parameter_name']
+    data = db.get_stats_by_parameter_name(parameter_name)
+    return json.dumps({'status': 200, 'data': data})
