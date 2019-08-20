@@ -45,6 +45,15 @@
       }
       update_team_ap();
 
+      function fetchAllData(callBack){
+        $.get(url='ajax/get_all_stats', 
+            data={}, 
+            success=function(responce){console.log(responce);}, 
+            dataType='json');
+      }
+      fetchAllData();
+
+
       $.get(url='ajax/available_actions', 
             data={'team_name': app.team_name}, 
             success=function(responce){ app.actions = responce.data.actions;}, 
@@ -147,6 +156,13 @@
           $.get(url='ajax/get_stats', 
               data={'parameter_name': parameter_name}, 
               success=callBack, 
+              dataType='json');
+        }
+
+        function fetchAllData(callBack){
+          $.get(url='ajax/get_stats', 
+              data={}, 
+              success=function(responce){console.log(responce);}, 
               dataType='json');
         }
 

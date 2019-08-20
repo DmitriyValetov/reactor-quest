@@ -108,3 +108,12 @@ teams:
 - govs
 - terrors
 - staff
+
+
+time_series:
+  - state
+  - rate
+
+scalars:
+  - boom_cnt
+  - zero_cnt

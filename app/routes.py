@@ -229,3 +229,9 @@ def get_stats():
     parameter_name = request.args['parameter_name']
     data = db.get_stats_by_parameter_name(parameter_name)
     return json.dumps({'status': 200, 'data': data})
+
+
+@reactor_blueprint.route('ajax/get_all_stats', methods=['GET'])
+def get_all_stats():
+    data = db.get_stats_by_configs(current_app.configs)
+    return json.dumps({'status': 200, 'data': data})

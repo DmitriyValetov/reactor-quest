@@ -280,6 +280,33 @@ def get_stats_by_parameter_name(parameter_name):
     engine.dispose()
     return data
 
+def get_stats_by_configs(configs):
+    engine = make_engine()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    data = {
+            'scalars': {s_p_name: None for s_p_name in configs['scalars']}, 
+            'time_series': {ts_p_name: {'x': [], 'y': []} for ts_p_name in configs['time_series']}
+            }
+    limit = 6
+    states = session.query(State).order_by(State.id.desc()).limit(limit)
+    for i, state in enumerate(states):
+        state_dict = yaml.load(state.data)
+        for time_series_name in configs['time_series']:
+            data[time_series_name]['x'].append(i*state_dict['step'])
+            data[time_series_name]['y'].append(state_dict[time_series_name])
+    
+    for time_series_name in configs['time_series']:       
+       data[time_series_name]['y'].sort(reverse=True)
+    
+    for scalar_name in configs['scalars']:       
+       data[scalar_name] = yaml.load(states[0].data)[scalar_name]
+    
+    session.close()
+    engine.dispose()
+
+    return data
+
 # def target_data_db_func(root):
 #     engine = create_engine('sqlite:///{}'.format(os.path.join(root, "solutions.sqlite")), echo=True)
 #     Session = sessionmaker(bind=engine)
