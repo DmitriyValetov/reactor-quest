@@ -117,3 +117,5 @@ time_series:
 scalars:
   - boom_cnt
   - zero_cnt
+  - state
+  - rate

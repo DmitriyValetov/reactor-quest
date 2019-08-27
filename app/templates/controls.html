@@ -103,6 +103,22 @@
       fetchAllData(function(responce){
         console.log('updating');
         console.log(responce);
+
+        // scalars:
+        var scalars_container = $('#forScalars');
+            scalars_container.empty();
+        var scalars_names = [];
+        for(var k in responce.scalars) scalars_names.push(k);
+        scalars_names.forEach(function(scalar_name){
+          scalars_container.append(`
+            <tr>
+              <td>${scalar_name}</td>
+              <td>${responce.scalars[scalar_name]}</td>
+            </tr>
+          `);
+        });
+
+        // time_series:
         var stats = [];
         for(var k in responce.time_series) stats.push(k);
           stats.forEach(function(stat_name){
@@ -111,13 +127,30 @@
             chart_holder[stat_name].update();
           });
         });
-        setTimeout(UpdateAllCharts, 1000, chart_holder);
+        setTimeout(UpdateAllCharts, 2000, chart_holder);
       });
     }
 
     function buildAllReceived(data){
       console.log('building first time');
       console.log(data);
+
+      // scalars:
+      var scalars_container = $('#forScalars');
+          scalars_container.empty();
+      var scalars_names = [];
+      for(var k in data.scalars) scalars_names.push(k);
+      scalars_names.forEach(function(scalar_name){
+        scalars_container.append(`
+          <tr>
+            <td>${scalar_name}</td>
+            <td>${data.scalars[scalar_name]}</td>
+          </tr>
+        `);
+      });
+
+
+      // time_series:
       var stats = [];
       for(var k in data.time_series) stats.push(k);
 
@@ -140,7 +173,7 @@
         chart_holder[stat_name] = chart_obj;
       });
 
-      setTimeout(UpdateAllCharts, 1000, chart_holder);
+      setTimeout(UpdateAllCharts, 2000, chart_holder);
     }
 
     function createConfig(title, data) {
@@ -205,7 +238,7 @@
               dataset.data = responce.data.y;
           });
           chart_obj.update();
-          setTimeout(runUpdateCycle, 1000, parameter_name, chart_obj);
+          setTimeout(runUpdateCycle, 2000, parameter_name, chart_obj);
         });
       }
 
@@ -237,7 +270,7 @@
       fetchData(parameter_name, function(responce){
         var config = createConfig(parameter_name, responce.data);
         var chart_obj = new Chart(ctx, config);
-        setTimeout(runUpdateCycle, 1000, parameter_name, chart_obj);
+        setTimeout(runUpdateCycle, 2000, parameter_name, chart_obj);
       });
 
     };
@@ -251,6 +284,19 @@
   <div class="col-md-10" >
 
     <div class="container card-group card" id='forCharts'></div>
+
+    <div class="container card-group card">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        
+        <tbody id='forScalars'></tbody>
+      </table>
+    </div>
 
     <div id='app'>
           <div class="card-group">

@@ -300,7 +300,7 @@ def get_stats_by_configs(configs):
        data['time_series'][time_series_name]['y'].sort(reverse=True)
     
     for scalar_name in configs['scalars']:       
-       data['scalars'][scalar_name] = yaml.load(states[0].data)[scalar_name]
+       data['scalars'][scalar_name] = yaml.load(states[-1].data)[scalar_name]
     
     session.close()
     engine.dispose()
