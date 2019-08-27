@@ -94,92 +94,88 @@
 
   <script>
 
-		
-
-
 		window.onload = function() {
-			
       var parameters_to_load = [
         'state',
         'rate',
         'acc',
         'produced'
       ]
-
       parameters_to_load.forEach(buildChart);
-      
-      function buildChart(parameter_name) {
+		};
 
-        function createConfig(title, data) {
-          return {
-            type: 'line',
-            data: {
-              labels: data.x,
-              datasets: [{
-                // label: 'dataset label',
-                steppedLine: false,
-                data: data.y, 
-                borderColor: window.chartColors.red,
-                fill: false,
-              }]
+
+    function buildChart(parameter_name) {
+
+      function createConfig(title, data) {
+        return {
+          type: 'line',
+          data: {
+            labels: data.x,
+            datasets: [{
+              // label: 'dataset label',
+              steppedLine: false,
+              data: data.y, 
+              borderColor: window.chartColors.red,
+              fill: false,
+            }]
+          },
+          options: {
+            legend: {
+              display: false
             },
-            options: {
-              legend: {
-                display: false
-              },
-              responsive: true,
-              title: {
-                display: true,
-                text: title,
-              }
+            responsive: true,
+            title: {
+              display: true,
+              text: title,
             }
-          };
-        }
-        
-        function addData(chart, label, data) {
-            chart.data.labels.push(label);
-            chart.data.datasets.forEach((dataset) => {
-                dataset.data.push(data);
-            });
-            chart.update();
-        }
-
-        function removeData(chart) {
-            chart.data.labels.pop();
-            chart.data.datasets.forEach((dataset) => {
-                dataset.data.pop();
-            });
-            chart.update();
-        }
-
-        function fetchData(parameter_name, callBack){
-          $.get(url='ajax/get_stats', 
-              data={'parameter_name': parameter_name}, 
-              success=callBack, 
-              dataType='json');
-        }
-
-        function fetchAllData(callBack){
-          $.get(url='ajax/get_stats', 
-              data={}, 
-              success=function(responce){console.log(responce);}, 
-              dataType='json');
-        }
-
-        function runUpdateCycle(parameter_name, chart_obj){
-          fetchData(parameter_name, function(responce){
-            chart_obj.data.datasets.forEach((dataset) => {
-                // console.log({'old': dataset.data, 'new': responce.data})
-                dataset.data = responce.data.y;
-            });
-            chart_obj.update();
-            setTimeout(runUpdateCycle, 1000, parameter_name, chart_obj);
+          }
+        };
+      }
+      
+      function addData(chart, label, data) {
+          chart.data.labels.push(label);
+          chart.data.datasets.forEach((dataset) => {
+              dataset.data.push(data);
           });
-          
-        }
+          chart.update();
+      }
 
-        var container = document.querySelector('.container');
-        var data = {
+      function removeData(chart) {
+          chart.data.labels.pop();
+          chart.data.datasets.forEach((dataset) => {
+              dataset.data.pop();
+          });
+          chart.update();
+      }
+
+      function fetchData(parameter_name, callBack){
+        $.get(url='ajax/get_stats', 
+            data={'parameter_name': parameter_name}, 
+            success=callBack, 
+            dataType='json');
+      }
+
+      function fetchAllData(callBack){
+        $.get(url='ajax/get_stats', 
+            data={}, 
+            success=function(responce){console.log(responce);}, 
+            dataType='json');
+      }
+
+      function runUpdateCycle(parameter_name, chart_obj){
+        fetchData(parameter_name, function(responce){
+          chart_obj.data.datasets.forEach((dataset) => {
+              // console.log({'old': dataset.data, 'new': responce.data})
+              dataset.data = responce.data.y;
+          });
+          chart_obj.update();
+          setTimeout(runUpdateCycle, 1000, parameter_name, chart_obj);
+        });
+      }
+
+      var container = document.getElementById('forCharts');
+      var data = {
         'x':[
             1,2,3,4,5,6
           ],
@@ -191,59 +187,73 @@
             randomScalingFactor(),
             randomScalingFactor()
           ]
-        };
-
-				var div = document.createElement('div');
-				div.classList.add('chart-container');
-
-				var canvas = document.createElement('canvas');
-				div.appendChild(canvas);
-				container.prepend(div);
-
-        var ctx = canvas.getContext('2d');
-        fetchData(parameter_name, function(responce){
-          var config = createConfig(parameter_name, responce.data);
-          var chart_obj = new Chart(ctx, config);
-          setTimeout(runUpdateCycle, 1000, parameter_name, chart_obj);
-        });
       };
+
+      var div = document.createElement('div');
+      div.classList.add('chart-container');
+
+      var canvas = document.createElement('canvas');
+      canvas.setAttribute('id', 'canvas_'+parameter_name);
+      div.appendChild(canvas);
+      container.prepend(div);
+
+      var ctx = canvas.getContext('2d');
+      fetchData(parameter_name, function(responce){
+        var config = createConfig(parameter_name, responce.data);
+      //   var config = createConfig(parameter_name, {
+      //   'x':[
+      //       1,2,3,4,5,6
+      //     ],
+      //   'y':[
+      //       randomScalingFactor(),
+      //       randomScalingFactor(),
+      //       randomScalingFactor(),
+      //       randomScalingFactor(),
+      //       randomScalingFactor(),
+      //       randomScalingFactor()
+      //     ]
+      // });
+        var chart_obj = new Chart(ctx, config);
+        setTimeout(runUpdateCycle, 1000, parameter_name, chart_obj);
+      });
+    };
       
-		};
 	</script>
 {% endblock%}
 
 
 {% block content %}
-  <div class="row justify-content-center" id='app'>
-    <div class="col-md-8">
-      <div class="card-group">
-        <div class="card p-4">
+<div class="row justify-content-center">
+  <div class="col-md-10" >
 
-          <div class="charts-container">
+    <div class="container card-group card" id='forCharts'></div>
+
+    <div id='app'>
+          <div class="card-group">
+            <div class="card p-4">
+              <div class="card-body">
+                <p>Команда: [[team_name]].</p>
+                <p>У вас [[team_ap]] очков.</p>
+                <h1>Ваши действия?</h1>
+                <div v-for="action in actions" class="row">
+                  <input v-bind:class="'btn btn-block btn-' + (action.cost < team_ap ? 'success' : 'danger') +' my-1'" type="button" v-on:click="push_action"
+                        v-bind:action_name="action.name" v-bind:action_cost="action.cost" v-bind:value="action.name + ' (' + action.cost.toString() + ' очков)'"/>
+                </div>
+                <div class="row">
+                    <input class="btn btn-block btn-primary my-1" type="button" onclick="window.location='/main';" value="Вернуться в основное меню"/>
+                </div>
+                </div>
+            </div>
           </div>
 
-          <div class="card-body">
-            <p>Команда: [[team_name]].</p>
-            <p>У вас [[team_ap]] очков.</p>
-            <h1>Ваши действия?</h1>
-            <div v-for="action in actions" class="row">
-              <input v-bind:class="'btn btn-block btn-' + (action.cost < team_ap ? 'success' : 'danger') +' my-1'" type="button" v-on:click="push_action"
-                    v-bind:action_name="action.name" v-bind:action_cost="action.cost" v-bind:value="action.name + ' (' + action.cost.toString() + ' очков)'"/>
-            </div>
-            <div class="row">
-                <input class="btn btn-block btn-primary my-1" type="button" onclick="window.location='/main';" value="Вернуться в основное меню"/>
-            </div>
-            </div>
-        </div>
-      </div>
+        <modal v-if="showModal" @close="showModal = false">
+          <h5 slot="header">[[modal_header]]</h5>
+          <h5 slot="body">[[modal_body]]</h5>
+        </modal>
     </div>
 
-    <modal v-if="showModal" @close="showModal = false">
-      <h5 slot="header">[[modal_header]]</h5>
-      <h5 slot="body">[[modal_body]]</h5>
-    </modal>
-
   </div>
+</div>
 
 <script type="text/x-template" id="modal-template">
   <transition name="modal">
