@@ -293,14 +293,14 @@ def get_stats_by_configs(configs):
     for i, state in enumerate(states):
         state_dict = yaml.load(state.data)
         for time_series_name in configs['time_series']:
-            data[time_series_name]['x'].append(i*state_dict['step'])
-            data[time_series_name]['y'].append(state_dict[time_series_name])
+            data['time_series'][time_series_name]['x'].append(i*state_dict['step'])
+            data['time_series'][time_series_name]['y'].append(state_dict[time_series_name])
     
     for time_series_name in configs['time_series']:       
-       data[time_series_name]['y'].sort(reverse=True)
+       data['time_series'][time_series_name]['y'].sort(reverse=True)
     
     for scalar_name in configs['scalars']:       
-       data[scalar_name] = yaml.load(states[0].data)[scalar_name]
+       data['scalars'][scalar_name] = yaml.load(states[0].data)[scalar_name]
     
     session.close()
     engine.dispose()
