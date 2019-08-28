@@ -288,8 +288,7 @@ def get_stats_by_configs(configs):
             'scalars': {s_p_name: None for s_p_name in configs['scalars']}, 
             'time_series': {ts_p_name: {'x': [], 'y': []} for ts_p_name in configs['time_series']}
             }
-    limit = 6
-    states = session.query(State).order_by(State.id.desc()).limit(limit)
+    states = session.query(State).order_by(State.id.desc()).limit(configs.get('points_amount', 5))
     for i, state in enumerate(states):
         state_dict = yaml.load(state.data)
         for time_series_name in configs['time_series']:

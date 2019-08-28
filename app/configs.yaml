@@ -119,3 +119,5 @@ scalars:
   - zero_cnt
   - state
   - rate
+
+points_amount: 5
