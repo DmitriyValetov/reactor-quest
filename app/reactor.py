@@ -14,6 +14,8 @@ class Reactor:
     def __init__(self, step=1, work=120, chance_rate=0.05, rate_factor=1,
                  reactor_strategy='reactor_1'):
         self.step = step  # state update period in seconds
+        self.cur_step = 0
+        self.cur_timestamp = None
         self.work = work  # working time in steps
         self.state = 0  # state [0, 100) (energy produced per step, max 100)
         self.rate = 0  # state rate per step
@@ -68,7 +70,9 @@ class Reactor:
                 self.plot()
 
     def update(self):
-        self.ts.append(datetime.utcnow())
+        self.cur_step += 1
+        self.cur_timestamp = datetime.utcnow()
+        self.ts.append(self.cur_timestamp)
         # update events queue
         if self.db:
             self.update_events_db()
@@ -234,6 +238,7 @@ class Reactor:
 
     def plot(self):
         print('\nstep: {}'.format(len(self.ts)))
+        print('cur step: {}'.format(self.cur_step))
         print('start: {}'.format(self.ts[0].strftime('%H:%M:%S')))
         print('current: {}'.format(self.ts[-1].strftime('%H:%M:%S')))
         print('scrams: {}'.format(self.scram_cnt))

@@ -1,5 +1,5 @@
 reactor:
-  step: 5  # state update period in seconds
+  step: 2  # state update period in seconds
   work: 100000  # reactor working time in steps
   chance_rate: 0.05  # boom chance rate per step (for abnormal reactor states 100+)
   rate_factor: 1  # rate of change reactor rate (determined manually)

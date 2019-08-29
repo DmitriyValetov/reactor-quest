@@ -112,12 +112,10 @@ teams:
 
 time_series:
   - state
-  - rate
 
 scalars:
+  - cur_step
+  - cur_timestamp
   - boom_cnt
   - zero_cnt
   - state
-  - rate
-
-points_amount: 5
