@@ -67,19 +67,17 @@ def main():
     team_ap = db.get_team_ap(session['login'])
     return render_template('main.html', team_name=team_name, team_ap=team_ap)
 
-@reactor_blueprint.route('/admin', methods=['GET', 'POST'])
-def admin():
-    """
-    main page
-    """
-    return render_template('admin.html')
 
 @reactor_blueprint.route('/controls', methods=['GET', 'POST'])
 def controls():
     """
     main page
     """
-    return render_template('controls.html', team_name=session['login'])
+    return render_template('controls.html', 
+                            team_name=session['login'], 
+                            pair_dashboard_with_controls=current_app.configs.get('pair_dashboard_with_controls'),
+                            stats_update_timeout=current_app.configs.get('stats_update_timeout', 1000)                            
+                        )
 
 @reactor_blueprint.route('/promo', methods=['GET', 'POST'])
 def promo():
@@ -93,7 +91,8 @@ def dash_board():
     """
     main page
     """
-    return render_template('dash_board.html')
+    return render_template('dash_board.html',
+                            stats_update_timeout=current_app.configs.get('stats_update_timeout', 1000))
 
 #===================================================================================
 #==========================   for ajax requests   ==================================
@@ -104,6 +103,17 @@ def configs():
     """
     main page
     """
+    return json.dumps(current_app.configs)
+
+@reactor_blueprint.route('/toggle_dashboards', methods=['GET'])
+def toggle_dashboards():
+    """
+    main page
+    """
+    if current_app.configs.get('pair_dashboard_with_controls'):
+        current_app.configs['pair_dashboard_with_controls'] = False
+    else:
+        current_app.configs['pair_dashboard_with_controls'] = True
     return json.dumps(current_app.configs)
 
 @reactor_blueprint.route('/restore_promos', methods=['GET', 'POST'])

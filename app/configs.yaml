@@ -108,7 +108,10 @@ teams:
 - govs
 - terrors
 - staff
+- admin
 
+pair_dashboard_with_controls: True
+stats_update_timeout: 2000 # mili seconds, default is 1000 mili seconds
 
 time_series:
   - state
