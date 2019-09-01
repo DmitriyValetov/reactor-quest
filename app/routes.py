@@ -243,5 +243,5 @@ def get_stats():
 
 @reactor_blueprint.route('ajax/get_all_stats', methods=['GET'])
 def get_all_stats():
-    data = db.get_stats_by_configs(current_app.configs)
+    data = db.get_stats_by_configs(current_app.configs, login=session['login'])
     return json.dumps({'status': 200, 'data': data})

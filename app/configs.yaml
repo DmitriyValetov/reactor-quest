@@ -103,7 +103,9 @@ promos:
     name: ibrae
   - ap: 1000
     name: mipt
+
 secret: ahalaymahalay
+
 teams:
 - govs
 - terrors
@@ -113,12 +115,41 @@ teams:
 pair_dashboard_with_controls: True
 stats_update_timeout: 2000 # mili seconds, default is 1000 mili seconds
 
-time_series:
-  - state
-
-scalars:
-  - cur_step
-  - cur_timestamp
-  - boom_cnt
-  - zero_cnt
-  - state
+plots_access:
+  govs:
+    time_series:
+      - state
+    scalars:
+      - cur_step
+      - cur_timestamp
+      - boom_cnt
+      - zero_cnt
+      - state
+  terrors:
+    time_series:
+      - state
+    scalars:
+      - cur_step
+      - cur_timestamp
+      - boom_cnt
+      - zero_cnt
+      - state
+  staff:
+    time_series:
+      - state
+    scalars:
+      - cur_step
+      - cur_timestamp
+      - boom_cnt
+      - zero_cnt
+      - state
+  admin:
+    time_series:
+      - state
+      - cur_step
+    scalars:
+      - cur_step
+      - cur_timestamp
+      - boom_cnt
+      - zero_cnt
+      - state
