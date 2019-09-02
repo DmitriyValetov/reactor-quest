@@ -3,10 +3,9 @@ import time
 # import matplotlib.pyplot as plt
 import sqlite3
 import json
-# import numpy as np
 import os
 
-from app.events import factory, staff_factory, terrors_factory, govs_factory
+from app.events import factory
 from app.strategies import strategy_factory
 
 
@@ -14,7 +13,7 @@ class Reactor:
     def __init__(self, step=1, work=120, chance_rate=0.05, rate_factor=1,
                  reactor_strategy='reactor_1'):
         self.step = step  # state update period in seconds
-        self.cur_step = 0
+        self.cur_step = 0  # current step
         self.cur_timestamp = None
         self.work = work  # working time in steps
         self.state = 0  # state [0, 100) (energy produced per step, max 100)
@@ -23,7 +22,7 @@ class Reactor:
         self.acc = 0  # state acceleration per step
         self.produced = 0  # total energy produced
         self.queue = []  # queue of current step events
-        self.events_state = {}  # db events states (check time of working)
+        self.events_state = {}  # db events states (start time step)
         self.chance = 0  # boom chance for states > 100 (checked every step)
         self.chance_rate = chance_rate  # chance rate per step for states > 100
         self.scram_cnt = 0  # number of scram uses
@@ -33,12 +32,12 @@ class Reactor:
         self.zero_cnt = 0  # number of 0 states
         self.over_cnt = 0  # number of 1+ states
         self.max_safe_steps = 0  # steps between 0 states
-        # self.ts = []  # times history by steps
-        # self.ss = []  # states history
+        self.ts = []  # times history by steps
+        self.ss = []  # states history
         # self.rs = []  # rates history
         # self.acs = []  # accelerations history
-        # self.ps = []  # energy produced history
-        # self.cs = []  # disaster chances history
+        self.ps = []  # energy produced history
+        self.cs = []  # disaster chances history
         self.dump_path = 'reactor.json'  # file or db path
         self.db = False  # dump to db?
         self.reactor_strategy = reactor_strategy
@@ -56,7 +55,15 @@ class Reactor:
         if plot:
             self.create_plot()
         while self.cur_step < self.work:
-            self.queue = []
+            # update history
+            self.cur_timestamp = datetime.utcnow()
+            self.ts.append(self.cur_timestamp)
+            self.ss.append(self.state)
+            # self.rs.append(self.rate)
+            # self.acs.append(self.acc)
+            self.ps.append(self.produced)
+            self.cs.append(self.chance)
+            # self.queue = []
             if simulate:
                 self.simulate(simulate_teams, simulate_strats)
             time.sleep(self.step)  # wait for the next step
@@ -68,23 +75,22 @@ class Reactor:
                 self.dump()
             if plot:
                 self.plot()
+            self.cur_step += 1
 
     def update(self):
-        self.cur_step += 1
-        self.cur_timestamp = datetime.utcnow()
-        # self.ts.append(self.cur_timestamp)
         # update events queue
         if self.db:
             self.update_events_db()
         else:
             self.update_events_local()
         # run events queue
-        for e in self.queue:
-            factory[e['name']](self)
+        for i, e in enumerate(self.queue):
+            self.events_state.setdefault(str(i), self.cur_step)
+            factory[e['name']](str(i), self)
         # update states and rate
-        self.rate += 0.5 * self.acc * self.rate_factor
-        self.state += self.rate
-        self.rate += 0.5 * self.acc * self.rate_factor
+        # self.rate += 0.5 * self.acc * self.rate_factor
+        # self.state += self.rate
+        # self.rate += 0.5 * self.acc * self.rate_factor
         if 0 < self.state <= 100:
             self.produced += self.state
             self.chance -= self.chance_rate
@@ -106,12 +112,6 @@ class Reactor:
             self.safe_cnt += 1
             self.over_cnt += 1
         self.max_safe_steps = max(self.safe_cnt, self.max_safe_steps)
-        # update history
-        # self.ss.append(self.state)
-        # self.rs.append(self.rate)
-        # self.acs.append(self.acc)
-        # self.ps.append(self.produced)
-        # self.cs.append(self.chance)
 
     def dump(self):
         if self.db:
@@ -167,18 +167,23 @@ class Reactor:
         else:
             for e in events_json:
                 rowid, event_json = e
-                self.events_state[str(rowid)] = self.events_state.setdefault(
-                    str(rowid), 0) + 1
+                # self.events_state.setdefault(str(rowid), self.cur_step)
                 # print(rowid, event_json, self.events_state[rowid])
                 event = json.loads(event_json)
-                if self.events_state[str(rowid)] <= event.get('work', 1):
-                    self.queue.append(event)
+                # if self.events_state[str(rowid)] + event.get('work', 1) - 1 <= self.cur_step:
+                self.queue.append(event)
         finally:
             con.close()
 
     def dump_db(self):
         state = self.__dict__.copy()
         state.pop('grid', None)  # from colab plot
+        state.pop('events_state', None)
+        state.pop('ts', None)
+        state.pop('ps', None)
+        state.pop('ss', None)
+        state.pop('cs', None)
+        state.pop('queue', None)
         state_json = json.dumps(
             state,
             default=lambda x: x.isoformat() if isinstance(x, datetime) else x)
@@ -195,9 +200,15 @@ class Reactor:
     def dump_json(self):
         state = self.__dict__.copy()
         state.pop('grid', None)  # from colab plot
+        state.pop('events_state', None)
+        state.pop('ts', None)
+        state.pop('ps', None)
+        state.pop('ss', None)
+        state.pop('cs', None)
+        state.pop('queue', None)
         with open(self.dump_path, 'w') as f:
-            json.dump(state, f, default=lambda x: x.isoformat()
-            if isinstance(x, datetime) else x)
+            json.dump(state, f, default=lambda x: x.isoformat() if isinstance(x,
+                                                                              datetime) else x)
 
     def load_db(self):
         con = sqlite3.connect(self.dump_path)
@@ -209,6 +220,9 @@ class Reactor:
             print(e)
         else:
             last_state = json.loads(last_state_json)
+            for i, t in enumerate(last_state['ts']):
+                last_state['ts'][i] = datetime.strptime(
+                    t, "%Y-%m-%dT%H:%M:%S.%f")
             for k in last_state:
                 self.__dict__[k] = last_state[k]
         finally:
@@ -220,10 +234,10 @@ class Reactor:
             cur = con.cursor()
             cur.execute('''DROP TABLE IF EXISTS states''')
             cur.execute('''CREATE TABLE IF NOT EXISTS states 
-          (id INTEGER PRIMARY KEY, data TEXT)''')
+            (id INTEGER PRIMARY KEY, data TEXT)''')
             cur.execute('''DROP TABLE IF EXISTS events''')
             cur.execute('''CREATE TABLE IF NOT EXISTS events
-          (id INTEGER PRIMARY KEY, data TEXT)''')
+            (id INTEGER PRIMARY KEY, data TEXT)''')
         except Exception as e:
             print(e)
         finally:
