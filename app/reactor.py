@@ -33,15 +33,15 @@ class Reactor:
         self.zero_cnt = 0  # number of 0 states
         self.over_cnt = 0  # number of 1+ states
         self.max_safe_steps = 0  # steps between 0 states
-        self.ts = []  # times history by steps
-        self.ss = []  # states history
-        self.rs = []  # rates history
-        self.acs = []  # accelerations history
-        self.ps = []  # energy produced history
-        self.cs = []  # disaster chances history
+        # self.ts = []  # times history by steps
+        # self.ss = []  # states history
+        # self.rs = []  # rates history
+        # self.acs = []  # accelerations history
+        # self.ps = []  # energy produced history
+        # self.cs = []  # disaster chances history
         self.dump_path = 'reactor.json'  # file or db path
         self.db = False  # dump to db?
-        self.reactor_strategy = 'reactor_1'
+        self.reactor_strategy = reactor_strategy
 
     def run(self, plot=True,
             dump_path='reactor.json', reset=True, last_dump=False,
@@ -55,14 +55,14 @@ class Reactor:
                 self.load_db()
         if plot:
             self.create_plot()
-        while len(self.ts) < self.work:
+        while self.cur_step < self.work:
             self.queue = []
             if simulate:
                 self.simulate(simulate_teams, simulate_strats)
             time.sleep(self.step)  # wait for the next step
             self.update()
             if last_dump:
-                if len(self.ts) == self.work:
+                if self.cur_step == self.work:
                     self.dump()
             else:
                 self.dump()
@@ -72,7 +72,7 @@ class Reactor:
     def update(self):
         self.cur_step += 1
         self.cur_timestamp = datetime.utcnow()
-        self.ts.append(self.cur_timestamp)
+        # self.ts.append(self.cur_timestamp)
         # update events queue
         if self.db:
             self.update_events_db()
@@ -107,11 +107,11 @@ class Reactor:
             self.over_cnt += 1
         self.max_safe_steps = max(self.safe_cnt, self.max_safe_steps)
         # update history
-        self.ss.append(self.state)
-        self.rs.append(self.rate)
-        self.acs.append(self.acc)
-        self.ps.append(self.produced)
-        self.cs.append(self.chance)
+        # self.ss.append(self.state)
+        # self.rs.append(self.rate)
+        # self.acs.append(self.acc)
+        # self.ps.append(self.produced)
+        # self.cs.append(self.chance)
 
     def dump(self):
         if self.db:
@@ -209,9 +209,6 @@ class Reactor:
             print(e)
         else:
             last_state = json.loads(last_state_json)
-            for i, t in enumerate(last_state['ts']):
-                last_state['ts'][i] = datetime.strptime(
-                    t, "%Y-%m-%dT%H:%M:%S.%f")
             for k in last_state:
                 self.__dict__[k] = last_state[k]
         finally:
@@ -237,10 +234,8 @@ class Reactor:
         pass
 
     def plot(self):
-        print('\nstep: {}'.format(len(self.ts)))
-        print('cur step: {}'.format(self.cur_step))
-        print('start: {}'.format(self.ts[0].strftime('%H:%M:%S')))
-        print('current: {}'.format(self.ts[-1].strftime('%H:%M:%S')))
+        print('\ncur step: {}'.format(self.cur_step))
+        print('cur timestamp: {}'.format(self.cur_timestamp))
         print('scrams: {}'.format(self.scram_cnt))
         print('booms: {}'.format(self.boom_cnt))
         print('zeros: {}'.format(self.zero_cnt))
@@ -248,11 +243,11 @@ class Reactor:
         print('atos: {}'.format(self.ato_cnt))
         print('safe steps: {}'.format(self.safe_cnt))
         print('max safe steps: {}'.format(self.max_safe_steps))
-        print('state: {}'.format(self.ss[-1]))
-        print('rate: {}'.format(self.rs[-1]))
-        print('acc: {}'.format(self.acs[-1]))
-        print('produced: {}'.format(self.ps[-1]))
-        print('chance: {}'.format(self.cs[-1]))
+        print('state: {}'.format(self.state))
+        print('rate: {}'.format(self.rate))
+        print('acc: {}'.format(self.acc))
+        print('produced: {}'.format(self.produced))
+        print('chance: {}'.format(self.chance))
         print('{:^4}|{:^10}|{:^20}|'.format('n', 'source', 'event'))
         print('-'.join(['' for _ in range(38)]))
         print('\n'.join(
