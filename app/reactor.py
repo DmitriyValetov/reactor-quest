@@ -21,8 +21,9 @@ class Reactor:
         self.rate_factor = rate_factor  # rate factor (manually determined)
         self.acc = 0  # state acceleration per step
         self.produced = 0  # total energy produced
-        self.queue = []  # queue of current step events
-        self.events_state = {}  # db events states (start time step)
+        self.queue = {}  # queue of current step events
+        self.events_start = {}  # db events states (start time step)
+        self.events = {}
         self.chance = 0  # boom chance for states > 100 (checked every step)
         self.chance_rate = chance_rate  # chance rate per step for states > 100
         self.scram_cnt = 0  # number of scram uses
@@ -34,7 +35,7 @@ class Reactor:
         self.max_safe_steps = 0  # steps between 0 states
         self.ts = []  # times history by steps
         self.ss = []  # states history
-        # self.rs = []  # rates history
+        self.rs = []  # rates history
         # self.acs = []  # accelerations history
         self.ps = []  # energy produced history
         self.cs = []  # disaster chances history
@@ -57,17 +58,13 @@ class Reactor:
         while self.cur_step < self.work:
             # update history
             self.cur_timestamp = datetime.utcnow()
-            self.ts.append(self.cur_timestamp)
-            self.ss.append(self.state)
-            # self.rs.append(self.rate)
-            # self.acs.append(self.acc)
-            self.ps.append(self.produced)
-            self.cs.append(self.chance)
-            # self.queue = []
+            self.queue = {}
             if simulate:
                 self.simulate(simulate_teams, simulate_strats)
             time.sleep(self.step)  # wait for the next step
+            prev_state = self.state
             self.update()
+            self.rate = self.state - prev_state
             if last_dump:
                 if self.cur_step == self.work:
                     self.dump()
@@ -76,6 +73,12 @@ class Reactor:
             if plot:
                 self.plot()
             self.cur_step += 1
+            self.ts.append(self.cur_timestamp)
+            self.ss.append(self.state)
+            self.rs.append(self.rate)
+            # self.acs.append(self.acc)
+            self.ps.append(self.produced)
+            self.cs.append(self.chance)
 
     def update(self):
         # update events queue
@@ -84,9 +87,8 @@ class Reactor:
         else:
             self.update_events_local()
         # run events queue
-        for i, e in enumerate(self.queue):
-            self.events_state.setdefault(str(i), self.cur_step)
-            factory[e['name']](str(i), self)
+        for i, (k, v) in enumerate(self.events.items()):
+            factory[v['name']](k, self)
         # update states and rate
         # self.rate += 0.5 * self.acc * self.rate_factor
         # self.state += self.rate
@@ -147,11 +149,11 @@ class Reactor:
             finally:
                 con.close()
         else:
-            self.queue.extend(events)
+            self.events.update(events)
 
     def update_events_local(self):
         events = strategy_factory[self.reactor_strategy](self, 'reactor')
-        self.queue.extend(events)
+        self.events.update(events)
 
     def update_events_db(self):
         events = strategy_factory[self.reactor_strategy](self, 'reactor')
@@ -167,23 +169,23 @@ class Reactor:
         else:
             for e in events_json:
                 rowid, event_json = e
-                # self.events_state.setdefault(str(rowid), self.cur_step)
-                # print(rowid, event_json, self.events_state[rowid])
                 event = json.loads(event_json)
-                # if self.events_state[str(rowid)] + event.get('work', 1) - 1 <= self.cur_step:
-                self.queue.append(event)
+                self.events_start.setdefault(int(rowid), self.cur_step)
+                self.events.setdefault(int(rowid), event)
         finally:
             con.close()
 
     def dump_db(self):
         state = self.__dict__.copy()
         state.pop('grid', None)  # from colab plot
-        state.pop('events_state', None)
+        state.pop('events_start', None)
         state.pop('ts', None)
         state.pop('ps', None)
+        state.pop('rs', None)
         state.pop('ss', None)
         state.pop('cs', None)
         state.pop('queue', None)
+        state.pop('events', None)
         state_json = json.dumps(
             state,
             default=lambda x: x.isoformat() if isinstance(x, datetime) else x)
@@ -200,12 +202,14 @@ class Reactor:
     def dump_json(self):
         state = self.__dict__.copy()
         state.pop('grid', None)  # from colab plot
-        state.pop('events_state', None)
+        state.pop('events_start', None)
         state.pop('ts', None)
         state.pop('ps', None)
+        state.pop('rs', None)
         state.pop('ss', None)
         state.pop('cs', None)
         state.pop('queue', None)
+        state.pop('events', None)
         with open(self.dump_path, 'w') as f:
             json.dump(state, f, default=lambda x: x.isoformat() if isinstance(x,
                                                                               datetime) else x)
@@ -262,11 +266,13 @@ class Reactor:
         print('acc: {}'.format(self.acc))
         print('produced: {}'.format(self.produced))
         print('chance: {}'.format(self.chance))
-        print('{:^4}|{:^10}|{:^20}|'.format('n', 'source', 'event'))
-        print('-'.join(['' for _ in range(38)]))
+        print('{:^4}|{:^4}|{:^7}|{:^10}|{:^20}|'.format(
+            'n', 'id', 'start', 'source', 'event'))
+        print('-'.join(['' for _ in range(51)]))
         print('\n'.join(
-            ['{:^4}|{:^10}|{:^20}|'.format(i + 1, x['source'], x['name'])
-             for i, x in enumerate(self.queue)]))
+            ['{:^4}|{:^4}|{:^7}|{:^10}|{:^20}|'.format(
+                i + 1, k, self.events_start[k], v['source'], v['name'])
+             for i, (k, v) in enumerate(self.queue.items())]))
         print('scores')
         print('terrors: {}'.format(-1 * self.boom_cnt))
         print('staff: {}'.format(

@@ -226,7 +226,7 @@ def push_team_action():
         return json.dumps({'status': 452, 'data': {'header': 'ОшЫбка', 'body': 'У этой команды({}) не хватает очков на это действие({})... Ты меня хакаешь?'.format(team_name, action_name)}})
     
     db.increment_ap(team_name, -found_action['cost'])
-    db.add_action_to_db(name=action_name, work=found_action['work'], source=team_name)
+    db.add_action_to_db(name=action_name, source=team_name)
 
     return json.dumps({'status': 200, 'data': {'header': 'Успешно!', 'body': '{} задействовало "{}"!'.format(team_name, action_name)}})
 
