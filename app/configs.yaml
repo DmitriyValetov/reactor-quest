@@ -25,7 +25,7 @@ actions:
   work: 1
 - access: [terrors]
   cost: 1
-  name: deenergizer
+  name: deenergize
   work: 1
 - access: [terrors]
   cost: 1

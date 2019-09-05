@@ -8,6 +8,6 @@ run:
   plot: yes  # plot reactor state
   simulate: yes  # simulate teams actions
   simulate_teams: null # which teams to simulate (null - simulate all, [] - no one)
-  simulate_strats: ['staff_1', 'terrors_1', 'govs_1']  # teams strategies
+  simulate_strats: ['staff_rand', 'terrors_rand', 'govs_rand']  # teams strategies
   reset: yes  # reset db before or start from the last saved state
   last_dump: no  # dump only last step (for testing, don't use it during the game)
