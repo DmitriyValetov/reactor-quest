@@ -114,6 +114,7 @@ teams:
 
 pair_dashboard_with_controls: True
 stats_update_timeout: 2000 # mili seconds, default is 1000 mili seconds
+points_amount: 20
 
 plots_access:
   govs:

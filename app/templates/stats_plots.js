@@ -33,6 +33,7 @@ function UpdateAllCharts(chart_holder){
       for(var k in responce.time_series) stats.push(k);
         stats.forEach(function(stat_name){
           chart_holder[stat_name].data.datasets.forEach((dataset) => {
+          dataset.data.labels = responce.time_series[stat_name].x;
           dataset.data = responce.time_series[stat_name].y;
           chart_holder[stat_name].update();
         });
@@ -87,30 +88,56 @@ function UpdateAllCharts(chart_holder){
   }
 
   function createConfig(title, data) {
+    var timeFormat = 'hh:mm:ss';
       return {
-        type: 'line',
-        data: {
-          labels: data.x,
-          datasets: [{
-            // label: 'dataset label',
-            steppedLine: false,
-            data: data.y, 
-            borderColor: window.chartColors.red,
-            fill: false,
-          }]
-        },
         options: {
-          legend: {
-            display: false
-          },
-          responsive: true,
-          title: {
-            display: true,
-            text: title,
-          }
+          scales: {
+            xAxes: [{
+              type: 'time',
+              time: {
+                  parser: timeFormat,
+                  // round: 'day'                                                                                                                                                                            
+                  tooltipFormat: 'YYYY-MM-DD HH:mm',
+                  displayFormats: {
+                      millisecond: 'HH:mm:ss.SSS',
+                      second: 'HH:mm:ss',
+                      minute: 'HH:mm',
+                      hour: 'HH'
+                  }
+              },
+              display: true,
+              scaleLabel: {
+                  display: true,
+                  labelString: 'Time'
+              }
+           }]
+        },
+      },
+      type: 'line',
+      data: {
+        // labels: data.x.map(function(timeStr){ return (new Date(timeStr)).getMinutes(); }),
+        labels: data.x.map(function(timeStr){ return moment(timeStr).format('hh:mm:ss'); }),
+        // labels: data.x,
+        datasets: [{
+          // label: 'dataset label',
+          steppedLine: false,
+          data: data.y, 
+          borderColor: window.chartColors.red,
+          fill: false,
+        }]
+      },
+      options: {
+        legend: {
+          display: false
+        },
+        responsive: true,
+        title: {
+          display: true,
+          text: title,
         }
-      };
-    }
+      }
+    };
+  }
     
   function addData(chart, label, data) {
       chart.data.labels.push(label);
@@ -144,6 +171,8 @@ function UpdateAllCharts(chart_holder){
 
   function runUpdateCycle(parameter_name, chart_obj){
       fetchData(parameter_name, function(responce){
+        chart_obj.config.data.labels = responce.data.x.map(function(timeStr){ return moment(timeStr).format('hh:mm:ss'); });
+        // chart_obj.data.labels = responce.data.x.map(function(timeStr){ return moment(timeStr).format('hh:mm:ss'); });
         chart_obj.data.datasets.forEach((dataset) => {
             dataset.data = responce.data.y;
         });
@@ -154,19 +183,6 @@ function UpdateAllCharts(chart_holder){
 
   function buildChart(parameter_name) {
     
-    // var data = {
-    //   'x':[
-    //       1,2,3,4,5,6
-    //     ],
-    //   'y':[
-    //       randomScalingFactor(),
-    //       randomScalingFactor(),
-    //       randomScalingFactor(),
-    //       randomScalingFactor(),
-    //       randomScalingFactor(),
-    //       randomScalingFactor()
-    //     ]
-    // };
     var container = document.getElementById('forCharts');
     var div = document.createElement('div');
     div.classList.add('chart-container');

@@ -282,7 +282,7 @@ def get_stats_by_parameter_name(parameter_name):
 
 def get_stats_by_configs(configs, login):
     if login not in configs['plots_access']:
-        raise ValueError('No such login in plots configs: {}'.format(plots_access))
+        raise ValueError('No such login in plots configs: {}'.format('plots_access'))
     
     engine = make_engine()
     Session = sessionmaker(bind=engine)
@@ -291,18 +291,24 @@ def get_stats_by_configs(configs, login):
             'scalars': {s_p_name: None for s_p_name in configs['plots_access'][login]['scalars']}, 
             'time_series': {ts_p_name: {'x': [], 'y': []} for ts_p_name in configs['plots_access'][login]['time_series']}
             }
-    states = session.query(State).order_by(State.id.desc()).limit(configs.get('points_amount', 5))
-    for i, state in enumerate(states):
+    states = session.query(State).order_by(State.id.desc()).limit(configs.get('points_amount', 5)).all()
+    if len(states) == 0:
+        return {}
+
+    for i, state in reversed(list(enumerate(states))):
         state_dict = yaml.load(state.data)
         for time_series_name in configs['plots_access'][login]['time_series']:
-            data['time_series'][time_series_name]['x'].append(i*state_dict['step'])
+            # data['time_series'][time_series_name]['x'].append(i*state_dict['step'])
+            data['time_series'][time_series_name]['x'].append(state_dict['cur_timestamp'])
             data['time_series'][time_series_name]['y'].append(state_dict[time_series_name])
     
-    for time_series_name in configs['plots_access'][login]['time_series']:       
-       data['time_series'][time_series_name]['y'].sort(reverse=True)
+
+    # for time_series_name in configs['plots_access'][login]['time_series']:       
+    #    data['time_series'][time_series_name]['y'] = data['time_series'][time_series_name]['y'].reverse()
+    #    data['time_series'][time_series_name]['x'] = data['time_series'][time_series_name]['x'].reverse()
     
     for scalar_name in configs['plots_access'][login]['scalars']:       
-       data['scalars'][scalar_name] = yaml.load(states[-1].data)[scalar_name]
+       data['scalars'][scalar_name] = yaml.load(states[0].data)[scalar_name]
     
     session.close()
     engine.dispose()
