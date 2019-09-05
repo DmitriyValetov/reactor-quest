@@ -249,13 +249,13 @@ def init_solutons_db_sheme():
     Base.metadata.create_all(engine)
     engine.dispose()
 
-def add_action_to_db(name, work, source):
+def add_action_to_db(name, source):
     engine = make_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
     timestamp = datetime.datetime.utcnow().isoformat()
-    new_event = Event(data=json.dumps({'name': name, 'work': work,
-                                       'source': source, 'timestamp': timestamp}))
+    new_event = Event(data=json.dumps({'name': name, 'source': source,
+                                       'timestamp': timestamp}))
     session.add(new_event)
     session.commit()
     session.close()
