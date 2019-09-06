@@ -5,7 +5,8 @@
 
 {% block head %}
   <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/for_charts.css')}}">
-  <script src="{{url_for('static', filename='js/Chart.min.js')}}"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <!-- <script src="{{url_for('static', filename='js/Chart.min.js')}}"></script> -->
   <script src="{{url_for('static', filename='js/utils.js')}}"></script>
   <script src='https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js'></script>
   <script src="{{url_for('static', filename='js/moment.min.js')}}"></script>

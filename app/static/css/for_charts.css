@@ -4,10 +4,12 @@ canvas {
     -ms-user-select: none;
 }
 .chart-container {
-    width: 200%;
-    margin-left: 40px;
-    margin-right: 40px;
-    margin-bottom: 40px;
+    /* width: 800px; */
+    width: 100%;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    /* transform:  scale(0.4); */
 }
 .container {
     display: flex;

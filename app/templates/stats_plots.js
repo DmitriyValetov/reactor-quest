@@ -1,13 +1,14 @@
+
 window.onload = function() {
-    // var parameters_to_load = [
-    //   'state',
-    //   'rate',
-    //   'acc',
-    //   'produced'
-    // ]
-    // parameters_to_load.forEach(buildChart);
-    fetchAllData(buildAllReceived);
+  google.charts.load("current", {
+    packages: ["corechart", "line"]
+  });
+  google.charts.setOnLoadCallback(drawCharts);
 };
+
+function drawCharts(){
+  fetchAllData(buildAllReceived);
+}
 
 function UpdateAllCharts(chart_holder){
     fetchAllData(function(responce){
@@ -32,11 +33,21 @@ function UpdateAllCharts(chart_holder){
       var stats = [];
       for(var k in responce.time_series) stats.push(k);
         stats.forEach(function(stat_name){
-          chart_holder[stat_name].data.datasets.forEach((dataset) => {
-          dataset.data.labels = responce.time_series[stat_name].x;
-          dataset.data = responce.time_series[stat_name].y;
-          chart_holder[stat_name].update();
-        });
+          // var pair = chart_holder[stat_name];
+          var chart_obj = chart_holder[stat_name][0],
+              data_ = chart_holder[stat_name][1],
+              options = chart_holder[stat_name][2];
+
+          data_.jc = [];
+          data_.wg = [];
+          // data.jc.shift(); // labels
+          // data.wg.shift(); // y values
+          
+          responce.time_series[stat_name].x.forEach(function(timeStr, i){
+            data_.addRow( [ moment.utc( (new Date(timeStr)).toString() ).local().format('hh:mm:ss'), responce.time_series[stat_name].y[i] ] );
+          });
+          chart_obj.draw(data_, options);
+        
       });
       setTimeout(UpdateAllCharts, {{stats_update_timeout}}, chart_holder);
     });
@@ -67,74 +78,44 @@ function UpdateAllCharts(chart_holder){
 
     var chart_holder = {};
     stats.forEach(function(stat_name){
-      var stats_data = data.time_series[stat_name];
-
       var container = document.getElementById('forCharts');
       var div = document.createElement('div');
       div.classList.add('chart-container');
-
-      var canvas = document.createElement('canvas');
-      canvas.setAttribute('id', 'canvas_'+stat_name);
-      div.appendChild(canvas);
       container.prepend(div);
 
-      var ctx = canvas.getContext('2d');
-      var config = createConfig(stat_name, stats_data);
-      var chart_obj = new Chart(ctx, config);
-      chart_holder[stat_name] = chart_obj;
+      var chart_obj = new google.visualization.LineChart(div);
+      var stats_data = data.time_series[stat_name];
+      var options = createOptions(stat_name);
+      var data_    = createData(stat_name, stats_data);
+      chart_obj.draw(data_, options);
+      chart_holder[stat_name] = [chart_obj, data_, options];
     });
 
     setTimeout(UpdateAllCharts, {{stats_update_timeout}}, chart_holder);
   }
 
-  function createConfig(title, data) {
-    var timeFormat = 'hh:mm:ss';
-      return {
-        options: {
-          scales: {
-            xAxes: [{
-              type: 'time',
-              time: {
-                  parser: timeFormat,
-                  // round: 'day'                                                                                                                                                                            
-                  tooltipFormat: 'YYYY-MM-DD HH:mm',
-                  displayFormats: {
-                      millisecond: 'HH:mm:ss.SSS',
-                      second: 'HH:mm:ss',
-                      minute: 'HH:mm',
-                      hour: 'HH'
-                  }
-              },
-              display: true,
-              scaleLabel: {
-                  display: true,
-                  labelString: 'Time'
-              }
-           }]
-        },
+  function createData(stat_name, stats_data) {
+    var xs = stats_data.x.map(function(timeStr){ return moment.utc( (new Date(timeStr)).toString() ).local().format('hh:mm:ss'); });
+    var ys = stats_data.y;
+    var data_list = xs.map(function(x, i){ return [x, ys[i]] });
+    var data_ = google.visualization.arrayToDataTable([
+      ["Time", stat_name],
+      [(0).toString(), 0]
+    ]);
+
+    data_list.forEach(function(e){data_.addRow(e)});
+
+    return data_; 
+  }
+
+  function createOptions(title) {
+    return {
+      title: title,
+      hAxis: {
+          title: "Time"
       },
-      type: 'line',
-      data: {
-        // labels: data.x.map(function(timeStr){ return (new Date(timeStr)).getMinutes(); }),
-        labels: data.x.map(function(timeStr){ return moment(timeStr).format('hh:mm:ss'); }),
-        // labels: data.x,
-        datasets: [{
-          // label: 'dataset label',
-          steppedLine: false,
-          data: data.y, 
-          borderColor: window.chartColors.red,
-          fill: false,
-        }]
-      },
-      options: {
-        legend: {
-          display: false
-        },
-        responsive: true,
-        title: {
-          display: true,
-          text: title,
-        }
+      vAxis: {
+          title: title
       }
     };
   }
@@ -179,24 +160,4 @@ function UpdateAllCharts(chart_holder){
         chart_obj.update();
         setTimeout(runUpdateCycle, {{stats_update_timeout}}, parameter_name, chart_obj);
       });
-    }
-
-  function buildChart(parameter_name) {
-    
-    var container = document.getElementById('forCharts');
-    var div = document.createElement('div');
-    div.classList.add('chart-container');
-
-    var canvas = document.createElement('canvas');
-    canvas.setAttribute('id', 'canvas_'+parameter_name);
-    div.appendChild(canvas);
-    container.prepend(div);
-
-    var ctx = canvas.getContext('2d');
-    fetchData(parameter_name, function(responce){
-      var config = createConfig(parameter_name, responce.data);
-      var chart_obj = new Chart(ctx, config);
-      setTimeout(runUpdateCycle, {{stats_update_timeout}}, parameter_name, chart_obj);
-    });
-
-};
+  }
