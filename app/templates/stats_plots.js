@@ -44,7 +44,7 @@ function UpdateAllCharts(chart_holder){
           // data.wg.shift(); // y values
           
           responce.time_series[stat_name].x.forEach(function(timeStr, i){
-            data_.addRow( [ moment.utc( (new Date(timeStr)).toString() ).local().format('hh:mm:ss'), responce.time_series[stat_name].y[i] ] );
+            data_.addRow( [ moment.utc( (new Date(timeStr)).toString() ).local().format('hh:mm:ss').toString(), responce.time_series[stat_name].y[i] ] );
           });
           chart_obj.draw(data_, options);
         
@@ -95,7 +95,7 @@ function UpdateAllCharts(chart_holder){
   }
 
   function createData(stat_name, stats_data) {
-    var xs = stats_data.x.map(function(timeStr){ return moment.utc( (new Date(timeStr)).toString() ).local().format('hh:mm:ss'); });
+    var xs = stats_data.x.map(function(timeStr){ return moment.utc( (new Date(timeStr)).toString() ).local().format('hh:mm:ss').toString(); });
     var ys = stats_data.y;
     var data_list = xs.map(function(x, i){ return [x, ys[i]] });
     var data_ = google.visualization.arrayToDataTable([
