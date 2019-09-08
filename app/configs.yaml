@@ -1,49 +1,81 @@
 actions:
+- access: [admin]
+  cost: 1
+  name: boom
+  name_ru: взрыв
+- access: [admin]
+  cost: 1
+  name: iodine
+  name_ru: иодная яма
 - access: [staff]
   cost: 1
   name: rod_up
+  name_ru: поднять стрежни (+5 к мощности, быстро)
 - access: [staff]
   cost: 1
   name: rod_down
+  name_ru: опустить стрежни (-5 к мощности, быстро)
 - access: [staff]
   cost: 1
   name: pump_up
+  name_ru: увеличить расход рабочего тела (-5 к мощности, медленно)
 - access: [staff]
   cost: 1
   name: pump_down
+  name_ru: уменьшить расход рабочего тела (+5 к мощности, медленно)
 - access: [staff]
   cost: 1
   name: boron
+  name_ru: добавить бора в активную зону (-5 к мощности, очень быстро)
 - access: [staff]
   cost: 1
   name: scram
-- access: [terrors]
-  cost: 1
-  name: deenergize
-- access: [terrors]
-  cost: 1
-  name: replace_boron
+  name_ru: АЗ-5
+#- access: [terrors]
+#  cost: 1
+#  name: deenergize
+#- access: [terrors]
+#  cost: 1
+#  name: replace_boron
 - access: [terrors]
   cost: 1
   name: pump_blow_up
+  name_ru: взорвать насос (+25 к мощности, быстро)
 - access: [terrors]
   cost: 1
   name: pump_break
+  name_ru: сломать насос (+25 к мощности, медленно)
 - access: [terrors]
   cost: 1
   name: fire
+  name_ru: устроить пожар (мощность блока падает до 0)
+- access: [terrors]
+  cost: 1
+  name: virus
+  name_ru: запустить вирус (мощность начинает случайно прыгать)
 - access: [govs]
   cost: 1
   name: tip
+  name_ru: съэкономить на стержнях (+5 к мощности, очень медленно)
 #- access: [govs]
 #  cost: 1
 #  name: anti_terrorist_operation
 - access: [govs]
   cost: 1
-  name: bribe_chief_engineer
+  name: bribe_chief_engineer_plus
+  name_ru: подкупить главного инженера (+20 к мощности, медленно)
+- access: [govs]
+  cost: 1
+  name: bribe_chief_engineer_minus
+  name_ru: подкупить главного инженера (-20 к мощности, медленно)
 - access: [govs]
   cost: 1
   name: press_operators
+  name_ru: заставить станцию выдавать нагрузку (+5 к мощности, быстро)
+- access: [govs]
+  cost: 1
+  name: hide_boom
+  name_ru: скрыть аварию (-1 к счетчику аварий, повлияет на победные очки диверсантов)
 auth:
   admin: e9c0bd34720a2861ba66d14131963422740238ac031b2ae92fc4f61d2d481d45516a17769504a81873c64c41092ce13f4849aea9de1d6e8f935973070e8ceb8f
   govs: 564b151637e9e9c63a84549bc6f673346cf6e8cae7527a2fe7049ad9898c61d5c8a2a3f91526a6f7433943706d60d15be8f11503ad958935a56e586fffea6a4e
@@ -59,7 +91,7 @@ promos:
   - ap: 1000
     name: bee
   staff:
-  - ap: 100
+  - ap: 1000
     name: hesouam
   - ap: 1000
     name: love
@@ -78,8 +110,8 @@ teams:
 - admin
 
 pair_dashboard_with_controls: True
-stats_update_timeout: 2000 # mili seconds, default is 1000 mili seconds
-points_amount: 5
+stats_update_timeout: 1000 # milliseconds, default is 1000 milliseconds
+points_amount: 100
 
 plots_access:
   govs:
@@ -88,34 +120,55 @@ plots_access:
     scalars:
       - cur_step
       - cur_timestamp
-      - boom_cnt
-      - zero_cnt
       - state
+      - rate
+      - chance
+      - booms_cnt
+      - staff_cnt
+      - govs_cnt
+      - terrors_cnt
+      - no_one_cnt
   terrors:
     time_series:
       - state
     scalars:
       - cur_step
       - cur_timestamp
-      - boom_cnt
-      - zero_cnt
       - state
+      - rate
+      - chance
+      - booms_cnt
+      - staff_cnt
+      - govs_cnt
+      - terrors_cnt
+      - no_one_cnt
   staff:
     time_series:
       - state
     scalars:
       - cur_step
       - cur_timestamp
-      - boom_cnt
-      - zero_cnt
       - state
+      - rate
+      - chance
+      - booms_cnt
+      - staff_cnt
+      - govs_cnt
+      - terrors_cnt
+      - no_one_cnt
   admin:
     time_series:
       - state
+      - rate
       - cur_step
     scalars:
       - cur_step
       - cur_timestamp
-      - boom_cnt
-      - zero_cnt
       - state
+      - rate
+      - chance
+      - booms_cnt
+      - staff_cnt
+      - govs_cnt
+      - terrors_cnt
+      - no_one_cnt
