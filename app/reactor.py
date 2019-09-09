@@ -7,41 +7,36 @@ import os
 
 from app.events import factory
 from app.strategies import strategy_factory
+from app.counts import counts_factory
 
 
 class Reactor:
-    def __init__(self, step=1, work=120, chance_rate=0.05, rate_factor=1,
-                 reactor_strategy='reactor_1'):
+    def __init__(self, step=1, work=120, chance_rate=0.05,
+                 reactor_strategy='reactor_1', counts='state_range'):
         self.step = step  # state update period in seconds
         self.cur_step = 0  # current step
         self.cur_timestamp = None
         self.work = work  # working time in steps
-        self.state = 0  # state [0, 100) (energy produced per step, max 100)
+        self.state = 0  # state
         self.rate = 0  # state rate per step
-        self.rate_factor = rate_factor  # rate factor (manually determined)
-        self.acc = 0  # state acceleration per step
-        self.produced = 0  # total energy produced
         self.queue = {}  # queue of current step events
         self.events_start = {}  # db events states (start time step)
         self.events = {}
         self.chance = 0  # boom chance for states > 100 (checked every step)
         self.chance_rate = chance_rate  # chance rate per step for states > 100
-        self.scram_cnt = 0  # number of scram uses
-        self.boom_cnt = 0  # number of booms
-        self.ato_cnt = 0  # number of anti-terrorist operations
-        self.safe_cnt = 0  # steps after 0 state counter (for max_safe_steps)
-        self.zero_cnt = 0  # number of 0 states
-        self.over_cnt = 0  # number of 1+ states
-        self.max_safe_steps = 0  # steps between 0 states
-        self.ts = []  # times history by steps
-        self.ss = []  # states history
-        self.rs = []  # rates history
-        # self.acs = []  # accelerations history
-        self.ps = []  # energy produced history
-        self.cs = []  # disaster chances history
+        self.times = []  # times history by steps
+        self.states = []  # states history
+        self.rates = []  # rates history
+        self.chances = []  # disaster chances history
         self.dump_path = 'reactor.json'  # file or db path
         self.db = False  # dump to db?
         self.reactor_strategy = reactor_strategy
+        self.counts = counts
+        self.staff_cnt = 0
+        self.govs_cnt = 0
+        self.terrors_cnt = 0
+        self.no_one_cnt = 0
+        self.booms_cnt = 0
 
     def run(self, plot=True,
             dump_path='reactor.json', reset=True, last_dump=False,
@@ -56,15 +51,12 @@ class Reactor:
         if plot:
             self.create_plot()
         while self.cur_step < self.work:
-            # update history
             self.cur_timestamp = datetime.utcnow()
             self.queue = {}
             if simulate:
                 self.simulate(simulate_teams, simulate_strats)
             time.sleep(self.step)  # wait for the next step
-            prev_state = self.state
             self.update()
-            self.rate = self.state - prev_state
             if last_dump:
                 if self.cur_step == self.work:
                     self.dump()
@@ -72,48 +64,47 @@ class Reactor:
                 self.dump()
             if plot:
                 self.plot()
-            self.cur_step += 1
-            self.ts.append(self.cur_timestamp)
-            self.ss.append(self.state)
-            self.rs.append(self.rate)
-            # self.acs.append(self.acc)
-            self.ps.append(self.produced)
-            self.cs.append(self.chance)
 
     def update(self):
+        prev_state = self.state
         # update events queue
         if self.db:
             self.update_events_db()
         else:
             self.update_events_local()
         # run events queue
+        print(self.state)
         for i, (k, v) in enumerate(self.events.items()):
-            factory[v['name']](k, self)
-        # update states and rate
-        # self.rate += 0.5 * self.acc * self.rate_factor
-        # self.state += self.rate
-        # self.rate += 0.5 * self.acc * self.rate_factor
-        if 0 < self.state <= 100:
-            self.produced += self.state
-            self.chance -= self.chance_rate
-            if self.chance < 0:
-                self.chance = 0
-            self.safe_cnt += 1
-        elif self.state <= 0:
+            e = factory.get(v['name'], None)
+            if e is not None:
+                e(k, self)
+                print(v['name'], self.state)
+        print(self.state)
+        # fix state
+        if self.state <= 0:
             self.state = 0
-            self.rate = 0
+        # update rate
+        self.rate = self.state - prev_state
+        # update chance
+        if 0 < self.state <= 100:
             self.chance -= self.chance_rate
             if self.chance < 0:
                 self.chance = 0
-            self.safe_cnt = 0
-            self.zero_cnt += 1
+        elif self.state <= 0:
+            self.chance -= self.chance_rate
+            if self.chance < 0:
+                self.chance = 0
         else:  # self.state > 100
-            self.produced += 100
             k = self.state / 100
             self.chance += k * self.chance_rate
-            self.safe_cnt += 1
-            self.over_cnt += 1
-        self.max_safe_steps = max(self.safe_cnt, self.max_safe_steps)
+        # update teams scores
+        counts_factory[self.counts](self)
+        # update history
+        self.cur_step += 1
+        self.times.append(self.cur_timestamp)
+        self.states.append(self.state)
+        self.rates.append(self.rate)
+        self.chances.append(self.chance)
 
     def dump(self):
         if self.db:
@@ -179,11 +170,10 @@ class Reactor:
         state = self.__dict__.copy()
         state.pop('grid', None)  # from colab plot
         state.pop('events_start', None)
-        state.pop('ts', None)
-        state.pop('ps', None)
-        state.pop('rs', None)
-        state.pop('ss', None)
-        state.pop('cs', None)
+        state.pop('times', None)
+        state.pop('rates', None)
+        state.pop('states', None)
+        state.pop('chances', None)
         state.pop('queue', None)
         state.pop('events', None)
         state_json = json.dumps(
@@ -203,11 +193,10 @@ class Reactor:
         state = self.__dict__.copy()
         state.pop('grid', None)  # from colab plot
         state.pop('events_start', None)
-        state.pop('ts', None)
-        state.pop('ps', None)
-        state.pop('rs', None)
-        state.pop('ss', None)
-        state.pop('cs', None)
+        state.pop('times', None)
+        state.pop('rates', None)
+        state.pop('states', None)
+        state.pop('chances', None)
         state.pop('queue', None)
         state.pop('events', None)
         with open(self.dump_path, 'w') as f:
@@ -254,17 +243,8 @@ class Reactor:
     def plot(self):
         print('\ncur step: {}'.format(self.cur_step))
         print('cur timestamp: {}'.format(self.cur_timestamp))
-        print('scrams: {}'.format(self.scram_cnt))
-        print('booms: {}'.format(self.boom_cnt))
-        print('zeros: {}'.format(self.zero_cnt))
-        print('overs: {}'.format(self.over_cnt))
-        print('atos: {}'.format(self.ato_cnt))
-        print('safe steps: {}'.format(self.safe_cnt))
-        print('max safe steps: {}'.format(self.max_safe_steps))
         print('state: {}'.format(self.state))
         print('rate: {}'.format(self.rate))
-        print('acc: {}'.format(self.acc))
-        print('produced: {}'.format(self.produced))
         print('chance: {}'.format(self.chance))
         print('{:^4}|{:^4}|{:^7}|{:^10}|{:^20}|'.format(
             'n', 'id', 'start', 'source', 'event'))
@@ -273,9 +253,8 @@ class Reactor:
             ['{:^4}|{:^4}|{:^7}|{:^10}|{:^20}|'.format(
                 i + 1, k, self.events_start[k], v['source'], v['name'])
              for i, (k, v) in enumerate(self.queue.items())]))
-        print('scores')
-        print('terrors: {}'.format(-1 * self.boom_cnt))
-        print('staff: {}'.format(
-            -1 * self.max_safe_steps + 0.4 * self.zero_cnt))
-        print('govs: {}'.format(
-            -4 * self.produced / 1000 + 1.4 * self.boom_cnt))
+        print('staff_cnt: {}'.format(self.staff_cnt))
+        print('govs_cnt: {}'.format(self.govs_cnt))
+        print('terrors_cnt: {}'.format(self.terrors_cnt))
+        print('no_one_cnt: {}'.format(self.no_one_cnt))
+

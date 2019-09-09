@@ -1,8 +1,7 @@
 reactor:
-  step: 2  # state update period in seconds
-  work: 100000  # reactor working time in steps
+  step: 1  # state update period in seconds
+  work: 86400  # reactor working time in steps
   chance_rate: 0.05  # boom chance rate per step (for abnormal reactor states 100+)
-  rate_factor: 1  # rate of change reactor rate (determined manually)
 run:
   dump_path: app/reactor.db  # path to db
   plot: yes  # plot reactor state
