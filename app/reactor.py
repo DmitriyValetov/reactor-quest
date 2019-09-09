@@ -171,7 +171,9 @@ class Reactor:
         state.pop('grid', None)  # from colab plot
         state.pop('events', None)
         state.pop('events_start', None)
+        state.pop('events_end', None)
         state.pop('events_to_stop', None)
+        state.pop('events_to_init', None)
         state.pop('times', None)
         state.pop('rates', None)
         state.pop('states', None)
@@ -199,7 +201,9 @@ class Reactor:
         state.pop('grid', None)  # from colab plot
         state.pop('events', None)
         state.pop('events_start', None)
+        state.pop('events_end', None)
         state.pop('events_to_stop', None)
+        state.pop('events_to_init', None)
         state.pop('times', None)
         state.pop('rates', None)
         state.pop('states', None)
