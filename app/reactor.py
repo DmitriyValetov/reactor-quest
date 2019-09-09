@@ -19,15 +19,17 @@ class Reactor:
         self.work = work  # working time in steps
         self.state = 0  # state
         self.rate = 0  # state rate per step
-        self.queue = {}  # queue of current step events
-        self.events_start = {}  # db events states (start time step)
-        self.events = {}
+        self.events = {}  # current step events
+        self.events_start = {}  # events start time step
+        self.events_end = {}  # events end time step
+        self.events_to_stop = {}  # events to stop (set 0 status at db)
+        self.events_to_init = {}  # events to init (set start, end at db)
         self.chance = 0  # boom chance for states > 100 (checked every step)
         self.chance_rate = chance_rate  # chance rate per step for states > 100
-        self.times = []  # times history by steps
-        self.states = []  # states history
-        self.rates = []  # rates history
-        self.chances = []  # disaster chances history
+        # self.times = []  # times history by steps
+        # self.states = []  # states history
+        # self.rates = []  # rates history
+        # self.chances = []  # disaster chances history
         self.dump_path = 'reactor.json'  # file or db path
         self.db = False  # dump to db?
         self.reactor_strategy = reactor_strategy
@@ -52,7 +54,6 @@ class Reactor:
             self.create_plot()
         while self.cur_step < self.work:
             self.cur_timestamp = datetime.utcnow()
-            self.queue = {}
             if simulate:
                 self.simulate(simulate_teams, simulate_strats)
             time.sleep(self.step)  # wait for the next step
@@ -64,47 +65,40 @@ class Reactor:
                 self.dump()
             if plot:
                 self.plot()
+            self.cur_step += 1
 
     def update(self):
         prev_state = self.state
-        # update events queue
+        # update events
+        self.events = {}
         if self.db:
             self.update_events_db()
         else:
             self.update_events_local()
-        # run events queue
-        print(self.state)
+        # run events
+        self.events_to_init = {}
+        self.events_to_stop = {}
         for i, (k, v) in enumerate(self.events.items()):
-            e = factory.get(v['name'], None)
-            if e is not None:
-                e(k, self)
-                print(v['name'], self.state)
-        print(self.state)
-        # fix state
-        if self.state <= 0:
-            self.state = 0
-        # update rate
-        self.rate = self.state - prev_state
-        # update chance
-        if 0 < self.state <= 100:
+            factory[v['name']](k, self)
+        # update chance and fix state
+        if 0 <= self.state <= 100:
             self.chance -= self.chance_rate
-            if self.chance < 0:
-                self.chance = 0
-        elif self.state <= 0:
-            self.chance -= self.chance_rate
-            if self.chance < 0:
-                self.chance = 0
         else:  # self.state > 100
             k = self.state / 100
             self.chance += k * self.chance_rate
+        if self.chance < 0:
+            self.chance = 0
+        if self.state < 0:
+            self.state = 0
+        # update rate
+        self.rate = self.state - prev_state
         # update teams scores
         counts_factory[self.counts](self)
         # update history
-        self.cur_step += 1
-        self.times.append(self.cur_timestamp)
-        self.states.append(self.state)
-        self.rates.append(self.rate)
-        self.chances.append(self.chance)
+        # self.times.append(self.cur_timestamp)
+        # self.states.append(self.state)
+        # self.rates.append(self.rate)
+        # self.chances.append(self.chance)
 
     def dump(self):
         if self.db:
@@ -132,8 +126,9 @@ class Reactor:
             con = sqlite3.connect(self.dump_path)
             try:
                 cur = con.cursor()
-                cur.executemany('INSERT INTO events VALUES (?, ?)',
-                                [(None, json.dumps(x)) for x in events])
+                cur.executemany('INSERT INTO events VALUES (?, ?, ?, ?, ?)',
+                                [(None, json.dumps(x), 1, None, None)
+                                 for x in events])
                 con.commit()
             except Exception as e:
                 print(e)
@@ -151,31 +146,36 @@ class Reactor:
         con = sqlite3.connect(self.dump_path)
         try:
             cur = con.cursor()
-            cur.executemany('INSERT INTO events VALUES (?, ?)',
-                            [(None, json.dumps(x)) for x in events])
+            cur.executemany('INSERT INTO events VALUES (?, ?, ?, ?, ?)',
+                            [(None, json.dumps(x), 1, None, None)
+                             for x in events])
             con.commit()
-            events_json = cur.execute('''SELECT * FROM events''').fetchall()
+            events_json = cur.execute(
+                '''SELECT * FROM events WHERE status > 0''').fetchall()
         except Exception as e:
             print(e)
         else:
             for e in events_json:
-                rowid, event_json = e
+                rowid, event_json, status, start, end = e
                 event = json.loads(event_json)
-                self.events_start.setdefault(int(rowid), self.cur_step)
-                self.events.setdefault(int(rowid), event)
+                if start is not None:
+                    self.events_start[int(rowid)] = start
+                if end is not None:
+                    self.events_end[int(rowid)] = end
+                self.events[int(rowid)] = event
         finally:
             con.close()
 
     def dump_db(self):
         state = self.__dict__.copy()
         state.pop('grid', None)  # from colab plot
+        state.pop('events', None)
         state.pop('events_start', None)
+        state.pop('events_to_stop', None)
         state.pop('times', None)
         state.pop('rates', None)
         state.pop('states', None)
         state.pop('chances', None)
-        state.pop('queue', None)
-        state.pop('events', None)
         state_json = json.dumps(
             state,
             default=lambda x: x.isoformat() if isinstance(x, datetime) else x)
@@ -183,6 +183,11 @@ class Reactor:
         try:
             cur = con.cursor()
             cur.execute('INSERT INTO states VALUES (?, ?)', [None, state_json])
+            cur.executemany('UPDATE events SET status = ? WHERE id = ?',
+                            [(0, k) for k in self.events_to_stop])
+            cur.executemany('UPDATE events SET start = ?, end = ? WHERE id = ?',
+                            [(self.events_start[k], self.events_end[k], k)
+                             for k in self.events_to_init])
             con.commit()
         except Exception as e:
             print(e)
@@ -192,16 +197,16 @@ class Reactor:
     def dump_json(self):
         state = self.__dict__.copy()
         state.pop('grid', None)  # from colab plot
+        state.pop('events', None)
         state.pop('events_start', None)
+        state.pop('events_to_stop', None)
         state.pop('times', None)
         state.pop('rates', None)
         state.pop('states', None)
         state.pop('chances', None)
-        state.pop('queue', None)
-        state.pop('events', None)
         with open(self.dump_path, 'w') as f:
-            json.dump(state, f, default=lambda x: x.isoformat() if isinstance(x,
-                                                                              datetime) else x)
+            json.dump(state, f, default=lambda x: x.isoformat() if isinstance(
+                x, datetime) else x)
 
     def load_db(self):
         con = sqlite3.connect(self.dump_path)
@@ -213,9 +218,9 @@ class Reactor:
             print(e)
         else:
             last_state = json.loads(last_state_json)
-            for i, t in enumerate(last_state['ts']):
-                last_state['ts'][i] = datetime.strptime(
-                    t, "%Y-%m-%dT%H:%M:%S.%f")
+            cur_timestamp_str = last_state['cur_timestamp']
+            last_state['cur_timestamp'] = datetime.strptime(
+                cur_timestamp_str, "%Y-%m-%dT%H:%M:%S.%f")
             for k in last_state:
                 self.__dict__[k] = last_state[k]
         finally:
@@ -230,7 +235,8 @@ class Reactor:
             (id INTEGER PRIMARY KEY, data TEXT)''')
             cur.execute('''DROP TABLE IF EXISTS events''')
             cur.execute('''CREATE TABLE IF NOT EXISTS events
-            (id INTEGER PRIMARY KEY, data TEXT)''')
+            (id INTEGER PRIMARY KEY, data TEXT, status INT, 
+            start INT, end INT)''')
         except Exception as e:
             print(e)
         finally:
@@ -242,19 +248,21 @@ class Reactor:
 
     def plot(self):
         print('\ncur step: {}'.format(self.cur_step))
-        print('cur timestamp: {}'.format(self.cur_timestamp))
-        print('state: {}'.format(self.state))
-        print('rate: {}'.format(self.rate))
-        print('chance: {}'.format(self.chance))
-        print('{:^4}|{:^4}|{:^7}|{:^10}|{:^20}|'.format(
-            'n', 'id', 'start', 'source', 'event'))
-        print('-'.join(['' for _ in range(51)]))
+        print('{:^4}|{:^4}|{:^7}|{:^5}|{:^10}|{:^20}|'.format(
+            'n', 'id', 'start', 'end', 'source', 'event'))
+        print('-'.join(['' for _ in range(57)]))
         print('\n'.join(
-            ['{:^4}|{:^4}|{:^7}|{:^10}|{:^20}|'.format(
-                i + 1, k, self.events_start[k], v['source'], v['name'])
-             for i, (k, v) in enumerate(self.queue.items())]))
-        print('staff_cnt: {}'.format(self.staff_cnt))
-        print('govs_cnt: {}'.format(self.govs_cnt))
-        print('terrors_cnt: {}'.format(self.terrors_cnt))
-        print('no_one_cnt: {}'.format(self.no_one_cnt))
+            ['{:^4}|{:^4}|{:^7}|{:^5}|{:^10}|{:^20}|'.format(
+                i + 1, k, self.events_start[k], self.events_end[k],
+                v['source'], v['name'])
+                for i, (k, v) in enumerate(self.events.items())]))
+        print('cur step:\t\t{}'.format(self.cur_step))
+        print('cur timestamp:\t{}'.format(self.cur_timestamp))
+        print('state:\t\t\t{}'.format(self.state))
+        print('rate:\t\t\t{}'.format(self.rate))
+        print('chance:\t\t\t{}'.format(self.chance))
+        print('staff_cnt:\t\t{}'.format(self.staff_cnt))
+        print('govs_cnt:\t\t{}'.format(self.govs_cnt))
+        print('terrors_cnt:\t{}'.format(self.terrors_cnt))
+        print('no_one_cnt:\t\t{}'.format(self.no_one_cnt))
 

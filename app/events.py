@@ -18,211 +18,253 @@ def test(index, reactor):
 def iodine(index, reactor):
     delta_state = -1
     delta_step = 1
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step and 0 < reactor.state < 50:
         d = exp_help_func(start_step, delta_step, cur_step, delta_state)
         reactor.state += d
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def tip(index, reactor):
     delta_state = 5
     delta_step = 120
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step and 0 < reactor.state < 50:
         d = exp_help_func(start_step, delta_step, cur_step, delta_state)
         reactor.state += d
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def boron(index, reactor):
     delta_state = -5
     delta_step = 1
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step:
         d = exp_help_func(start_step, delta_step, cur_step, delta_state)
         reactor.state += d
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def pump_down(index, reactor):
     delta_state = 5
     delta_step = 10
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step:
         d = exp_help_func(start_step, delta_step, cur_step, delta_state)
         reactor.state += d
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def pump_up(index, reactor):
     delta_state = -5
     delta_step = 10
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step:
         d = exp_help_func(start_step, delta_step, cur_step, delta_state)
         reactor.state += d
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def rod_up(index, reactor):
     delta_state = 5
     delta_step = 5
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step:
         d = exp_help_func(start_step, delta_step, cur_step, delta_state)
         reactor.state += d
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def rod_down(index, reactor):
     delta_state = -5
     delta_step = 5
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step:
         d = exp_help_func(start_step, delta_step, cur_step, delta_state)
         reactor.state += d
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def pump_break(index, reactor):
     delta_state = 25
     delta_step = 10
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step:
         d = exp_help_func(start_step, delta_step, cur_step, delta_state)
         reactor.state += d
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def pump_blow_up(index, reactor):
     delta_state = 25
     delta_step = 1
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step:
         d = exp_help_func(start_step, delta_step, cur_step, delta_state)
         reactor.state += d
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def fire(index, reactor):
     delta_step = 0
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step:
         reactor.state = 0
         reactor.rate = 0
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def press_operators(index, reactor):
     delta_state = 5
     delta_step = 5
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step:
         d = exp_help_func(start_step, delta_step, cur_step, delta_state)
         reactor.state += d
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def scram(index, reactor):
     delta_step = 0
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step:
         reactor.state = 0
         reactor.rate = 0
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def boom(index, reactor):
     delta_step = 0
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step:
         reactor.state = 0
         reactor.rate = 0
         reactor.booms_cnt += 1
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def virus(index, reactor):
     delta_step = 15
     delta_state = random.choice([-15, 15])
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step:
         d = exp_help_func(start_step, delta_step, cur_step, delta_state)
         reactor.state += d
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def hide_boom(index, reactor):
     delta_step = 0
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step:
         if reactor.booms_cnt > 0:
             reactor.booms_cnt -= 1
-        reactor.queue[index] = reactor.events[index]
-
-# def deenergize(reactor):
-#     reactor.queue.append({'name': 'pump_down', 'work': 1, 'source': 'reactor'})
-
-# def replace_boron(reactor):
-#     reactor.acc += 1
-
-# def anti_terrorist_operation(reactor):
-#     reactor.ato_cnt += 1
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def bribe_chief_engineer_plus(index, reactor):
     delta_state = 20
     delta_step = 20
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step and 0 < reactor.state < 50:
         d = exp_help_func(start_step, delta_step, cur_step, delta_state)
         reactor.state += d
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 def bribe_chief_engineer_minus(index, reactor):
     delta_state = -20
     delta_step = 20
-    start_step = reactor.events_start[index]
-    end_step = start_step + delta_step
     cur_step = reactor.cur_step
+    start_step = reactor.events_start.setdefault(index, cur_step)
+    end_step = reactor.events_end.setdefault(index, start_step + delta_step)
     if cur_step <= end_step and 0 < reactor.state < 50:
         d = exp_help_func(start_step, delta_step, cur_step, delta_state)
         reactor.state += d
-        reactor.queue[index] = reactor.events[index]
+    if cur_step >= end_step:
+        reactor.events_to_stop[index] = reactor.events[index]
+    if start_step == cur_step:
+        reactor.events_to_init[index] = reactor.events[index]
 
 
 factory = {
