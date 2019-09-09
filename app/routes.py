@@ -56,6 +56,8 @@ def main():
             del session['login']
             del session['pass']
             return redirect(url_for('reactor.login'))
+        elif action == 'map':
+            return redirect(url_for('reactor.map'))
         elif action == 'topromo':
             return redirect(url_for('reactor.promo'))
         elif action == 'tocontrols':
@@ -66,6 +68,13 @@ def main():
     team_name = session['login']
     team_ap = db.get_team_ap(session['login'])
     return render_template('main.html', team_name=team_name, team_ap=team_ap)
+
+@reactor_blueprint.route('/map', methods=['GET', 'POST'])
+def map():
+    """
+    main page
+    """
+    return render_template('map.html')
 
 
 @reactor_blueprint.route('/controls', methods=['GET', 'POST'])
