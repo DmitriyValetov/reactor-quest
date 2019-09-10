@@ -33,6 +33,15 @@ class Event(Base):
         return "Event ({} : {} : {} : {} : {} : {})".format(
             self.id, self.name, self.ap, self.status, self.start, self.end)
 
+    def toDict(self):
+        data = json.loads(self.data)
+        return {
+            'id': self.id,
+            'name': data['name'],
+            'source': data['source'],
+            'status': self.status
+        }
+
 class Team(Base):
     __tablename__ = 'teams'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -317,6 +326,51 @@ def get_stats_by_configs(configs, login):
     engine.dispose()
 
     return data
+
+
+def get_events(access):
+    engine = make_engine()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    events = []
+    try:
+        events_objs = session.query(Event).filter_by(status=1).all()
+        events = [ev.toDict() for ev in events_objs] 
+        for ev in events:
+            ev['access'] = True if ev['source'] == access else False
+
+    except BaseException as e:
+        raise e
+    finally:
+        session.close()
+        engine.dispose()
+
+    return events
+
+
+def stop_events(event_id, access):
+    engine = make_engine()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    events = []
+    response_text = 'some server error'
+    try:
+        event_obj = session.query(Event).filter_by(id=event_id).first()
+        if event_obj.status == 0:
+            response_text = "Event is already down."
+        else:
+            response_text = "Event stopped!"
+            event_obj.status = 0
+            session.add(event_obj)
+
+    except BaseException as e:
+        raise e
+    finally:
+        session.commit()
+        session.close()
+        engine.dispose()
+
+    return response_text
 
 # def target_data_db_func(root):
 #     engine = create_engine('sqlite:///{}'.format(os.path.join(root, "solutions.sqlite")), echo=True)

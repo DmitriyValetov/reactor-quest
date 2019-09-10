@@ -132,7 +132,8 @@ plots_access:
     time_series:
       - state
     scalars:
-      - cur_step
+      - name: cur_step
+        name_ru: текущий шаг
       - cur_timestamp
       - state
       - rate

@@ -107,6 +107,16 @@ def dash_board():
 #==========================   for ajax requests   ==================================
 #===================================================================================
 
+@reactor_blueprint.route('ajax/get_events', methods=['GET'])
+def get_events():
+    return json.dumps(db.get_events(access=session['login']))
+
+
+@reactor_blueprint.route('ajax/stop_event', methods=['GET'])
+def stop_events():
+    return json.dumps({'server_answer': db.stop_events(event_id=request.args['event_id'], access=session['login'])})
+
+
 @reactor_blueprint.route('/configs', methods=['GET', 'POST'])
 def configs():
     """

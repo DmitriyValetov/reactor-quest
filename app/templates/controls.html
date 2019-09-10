@@ -12,6 +12,7 @@
   <script src="{{url_for('static', filename='js/moment.min.js')}}"></script>
   <script src='https://cdn.jsdelivr.net/npm/vue'></script>
   <script src='https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js'></script>
+  <script src="{{url_for('static', filename='js/events_tabel.js')}}"></script>
   <script>
     // variables declaration before init
     var app = undefined;
@@ -103,6 +104,7 @@
       {% include 'stats_plots.html' %}		
     {% endif %}
 
+    {% include 'events_table.html' %}
 
     <div id='app'>
           <div class="card-group">
@@ -127,6 +129,7 @@
           <h5 slot="body">[[modal_body]]</h5>
         </modal>
     </div>
+
 
   </div>
 </div>
