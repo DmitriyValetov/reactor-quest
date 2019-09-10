@@ -1,12 +1,16 @@
 actions:
 - access: [admin]
-  cost: 1
+  cost: 0
   name: boom
   name_ru: взрыв
 - access: [admin]
-  cost: 1
+  cost: 0
   name: iodine
   name_ru: иодная яма
+- access: [admin]
+  cost: 0
+  name: reset
+  name_ru: сброс
 - access: [staff]
   cost: 1
   name: rod_up
@@ -31,9 +35,14 @@ actions:
   cost: 1
   name: scram
   name_ru: АЗ-5
-#- access: [terrors]
-#  cost: 1
-#  name: deenergize
+- access: [staff]
+  cost: 1
+  name: plant_inspection
+  name_ru: Провести инспекцию на станции (50% что их действия не сработают)
+- access: [staff]
+  cost: 1
+  name: bribe_govs
+  name_ru: Подкупить чиновников (50% что их действия не сработают)
 #- access: [terrors]
 #  cost: 1
 #  name: replace_boron
@@ -53,13 +62,26 @@ actions:
   cost: 1
   name: virus
   name_ru: запустить вирус (мощность начинает случайно прыгать)
+- access: [terrors]
+  cost: 1
+  name: poison_staff
+  name_ru: травануть операторов (50% что их действия не сработают)
+- access: [terrors]
+  cost: 1
+  name: insert_spy
+  name_ru: внедрить шпиона в правительство (50% что их действия не сработают)
 - access: [govs]
   cost: 1
   name: tip
   name_ru: съэкономить на стержнях (+5 к мощности, очень медленно)
-#- access: [govs]
-#  cost: 1
-#  name: anti_terrorist_operation
+- access: [govs]
+  cost: 1
+  name: anti_terrorist_operation
+  name_ru: антитеррористическая операция (50% что их действия не сработают)
+- access: [govs]
+  cost: 1
+  name: intimidate_staff
+  name_ru: запугать персонал (50% что их действия не сработают)
 - access: [govs]
   cost: 1
   name: bribe_chief_engineer_plus
@@ -100,6 +122,9 @@ promos:
     name: ibrae
   - ap: 1000
     name: mipt
+  admin:
+  - ap: 100500
+    name: admin
 
 secret: ahalaymahalay
 
@@ -132,8 +157,7 @@ plots_access:
     time_series:
       - state
     scalars:
-      - name: cur_step
-        name_ru: текущий шаг
+      - cur_step
       - cur_timestamp
       - state
       - rate
