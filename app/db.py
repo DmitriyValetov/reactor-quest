@@ -26,8 +26,12 @@ class Event(Base):
     __tablename__ = 'events'
     id = Column(Integer, primary_key=True, autoincrement=True)
     data = Column(String)
+    status = Column(Integer)
+    start = Column(Integer)
+    end = Column(Integer)
     def __repr__(self):
-        return "Event ({} : {} : {})".format(self.id, self.name, self.ap)
+        return "Event ({} : {} : {} : {} : {} : {})".format(
+            self.id, self.name, self.ap, self.status, self.start, self.end)
 
 class Team(Base):
     __tablename__ = 'teams'
@@ -253,9 +257,8 @@ def add_action_to_db(name, source):
     engine = make_engine()
     Session = sessionmaker(bind=engine)
     session = Session()
-    timestamp = datetime.datetime.utcnow().isoformat()
-    new_event = Event(data=json.dumps({'name': name, 'source': source,
-                                       'timestamp': timestamp}))
+    new_event = Event(data=json.dumps({'name': name, 'source': source}),
+                      status=1)
     session.add(new_event)
     session.commit()
     session.close()
