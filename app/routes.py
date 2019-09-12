@@ -117,10 +117,11 @@ def translate(data):
             else:
                 el['view_name'] = el['name']
 
-            if 'source' in el and el['source'] in eng_ru:
-                el['view_source'] = eng_ru[el['source']]
-            else:
-                el['view_source'] = el['source']
+            if 'source' in el: 
+                if el['source'] in eng_ru:
+                    el['view_source'] = eng_ru[el['source']]
+                else:
+                    el['view_source'] = el['source']
 
             translated.append(el)
 
