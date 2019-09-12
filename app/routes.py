@@ -4,6 +4,7 @@ from flask import current_app, send_file
 import hashlib
 import json
 from . import db
+from .translations import eng_ru
 
 no_login_check_routes = [
     'reactor.get_teams_promos_info', # /info
@@ -107,14 +108,45 @@ def dash_board():
 #==========================   for ajax requests   ==================================
 #===================================================================================
 
+def translate(data):
+    if isinstance(data, list):
+        translated = []
+        for el in data:
+            if el['name'] in eng_ru:
+                el['view_name'] = eng_ru[el['name']]
+            else:
+                el['view_name'] = el['name']
+
+            if 'source' in el and el['source'] in eng_ru:
+                el['view_source'] = eng_ru[el['source']]
+            else:
+                el['view_source'] = el['source']
+
+            translated.append(el)
+
+    elif isinstance(data, str):
+        if data in eng_ru:
+            translated = eng_ru[data]
+        else:
+            translated = data
+
+    else:
+        raise TypeError('Invaid type passed for translation: {}'.format(data))
+
+    return translated
+
+
 @reactor_blueprint.route('ajax/get_events', methods=['GET'])
 def get_events():
-    return json.dumps(db.get_events(access=session['login']))
+    return json.dumps(translate(db.get_events(access=session['login'])))
 
 
 @reactor_blueprint.route('ajax/stop_event', methods=['GET'])
 def stop_events():
-    return json.dumps({'server_answer': db.stop_events(event_id=request.args['event_id'], access=session['login'])})
+    return json.dumps({
+            'server_answer': db.stop_event(event_id=request.args['event_id'], access=session['login']), 
+            'event_id': request.args['event_id']
+        })
 
 
 @reactor_blueprint.route('/configs', methods=['GET', 'POST'])
@@ -175,7 +207,7 @@ def toggle_promo():
     else:
         responce_msg = "Это промо уже было активировано вашей командой :)"
 
-    return  json.dumps({'status': responce_status, 'data': responce_msg, 'current_ap': team_ap_is})
+    return json.dumps({'status': responce_status, 'data': responce_msg, 'current_ap': team_ap_is})
 
 
 @reactor_blueprint.route('/info', methods=['GET'])
@@ -223,7 +255,7 @@ def available_actions():
     actions = filter(lambda x: x['access'] is None or team_name in x['access'], current_app.configs['actions'])
     actions = map(lambda x: {'name': x['name'], 'cost': x['cost']}, actions)
     actions = list(actions)
-    return json.dumps({'status': 200, 'data': {'actions': actions}})
+    return json.dumps({'status': 200, 'data': {'actions': translate(actions)}})
 
 @reactor_blueprint.route('ajax/push_action', methods=['POST'])
 def push_team_action():
@@ -238,16 +270,16 @@ def push_team_action():
     action_exists = len(found_similar) > 0
     found_action = found_similar[0]
     if not action_exists:
-        return json.dumps({'status': 452, 'data': {'header': 'ОшЫбка', 'body': 'Нет такого действия({}) в списке на сервере... Ты меня хакаешь?'.format(action_name)}})
+        return json.dumps({'status': 452, 'data': {'header': 'ОшЫбка', 'body': 'Нет такого действия({}) в списке на сервере... Ты меня хакаешь?'.format(translate(action_name))}})
     if found_action['access'] is not None and team_name not in found_action['access']:
-        return json.dumps({'status': 452, 'data': {'header': 'ОшЫбка', 'body': 'Эта команда({}) не имеет права на это действие({})... Ты меня хакаешь?'.format(team_name, action_name)}})
+        return json.dumps({'status': 452, 'data': {'header': 'ОшЫбка', 'body': 'Эта команда({}) не имеет права на это действие({})... Ты меня хакаешь?'.format(team_name, translate(action_name))}})
     if team_ap < found_action['cost']:
-        return json.dumps({'status': 452, 'data': {'header': 'ОшЫбка', 'body': 'У этой команды({}) не хватает очков на это действие({})... Ты меня хакаешь?'.format(team_name, action_name)}})
+        return json.dumps({'status': 452, 'data': {'header': 'ОшЫбка', 'body': 'У этой команды({}) не хватает очков на это действие({})... Ты меня хакаешь?'.format(team_name, translate(action_name))}})
     
     db.increment_ap(team_name, -found_action['cost'])
     db.add_action_to_db(name=action_name, source=team_name)
 
-    return json.dumps({'status': 200, 'data': {'header': 'Успешно!', 'body': '{} задействовало "{}"!'.format(team_name, action_name)}})
+    return json.dumps({'status': 200, 'data': {'header': 'Успешно!', 'body': '{} задействовало "{}"!'.format(team_name, translate(action_name))}})
 
 
 @reactor_blueprint.route('ajax/get_stats', methods=['GET'])

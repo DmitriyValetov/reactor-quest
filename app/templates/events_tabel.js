@@ -9,7 +9,11 @@ $(document).ready(function() {
     }
 
     function post_process_stop_request(responce){
-        console.log(responce);
+        var obj = JSON.parse(responce);
+        console.log(obj);        
+        if(obj.hasOwnProperty('event_id')){
+            $(`tr #${obj.id}`).remove();
+        }
     }
 
     function try_to_stop_event(){
@@ -17,18 +21,14 @@ $(document).ready(function() {
         $.get('ajax/stop_event', {'event_id': event_id}, post_process_stop_request)
     }
 
-    fetchData(function(events){
-        /**
-         * event: id, name, source, status(1)
-         */
-        console.log(events);
+    function build_events_table(events){
         events_table.empty();
         events.forEach(function(event_obj){
             if(event_obj.access){
                 events_table.append(`
-                    <tr>
-                    <td>${event_obj['name']}</td>
-                    <td>${event_obj['source']}</td>
+                    <tr id='${event_obj['id']}'>
+                    <td>${event_obj['view_name']}</td>
+                    <td>${event_obj['view_source']}</td>
                     <td><button id="${event_obj['id']}" class='btn btn-secondary'><i class="fa fa-times" aria-hidden="true"></i></button></td>
                     </tr>
                 `);
@@ -39,17 +39,27 @@ $(document).ready(function() {
             } else {
                 events_table.append(`
                     <tr>
-                        <td>${event_obj['name']}</td>
-                        <td>${event_obj['source']}</td>
+                        <td>${event_obj['view_name']}</td>
+                        <td>${event_obj['view_source']}</td>
                         <td></td>
                     </tr>
                 `);
             }
+        });
+    }
 
 
-        });        
-    });
+    function run_events_table(){
+        fetchData(function(events){
+            /**
+             * event: id, name, source, status(1)
+             */
+            build_events_table(events);
+            setTimeout(run_events_table, {{stats_update_timeout}});     
+        });
+    }
 
+    run_events_table();
 
 
 });

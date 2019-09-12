@@ -70,6 +70,7 @@ body {
   color: #23282c;
   text-align: left;
   background-color: #e4e5e6;
+  background-image: url(backg.jpg);
 }
 
 [tabindex="-1"]:focus {

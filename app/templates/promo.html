@@ -71,7 +71,7 @@
   <div class="row justify-content-center" id='app'>
     <div class="col-md-8">
       <div class="card-group">
-        <div class="card p-4">
+        <div class="card p-4" style='background-color: #ffff00;'>
           <div class="card-body">
             <div>
               <h1>Промокод на пирожки</h1>
@@ -88,11 +88,11 @@
               </div>
               <div class='row justify-content-between'>
                 <div class="col-4">
-                  <button class="btn btn-primary px-4" type='button' v-on:click='toggle_promo'>Ввод</button>
+                  <button class="btn btn-dark px-4" type='button' v-on:click='toggle_promo'>Ввод</button>
                 </div>
                 <div class="col-4">
                   <div class="float-right">
-                      <input class="btn btn-secondary px-4" onclick='window.location="/main";' type="button" value='В меню'/>
+                      <input class="btn btn-dark px-4" onclick='window.location="/main";' type="button" value='В меню'/>
                   </div>
                 </div>  
               </div>
@@ -132,7 +132,7 @@
           <div class="modal-footer">
             <slot name="footer">
               <!-- default footer -->
-              <button class="modal-default-button btn btn-primary" @click="$emit('close')">
+              <button class="modal-default-button btn btn-dark" @click="$emit('close')">
                 OK
               </button>
             </slot>

@@ -12,7 +12,6 @@
   <script src="{{url_for('static', filename='js/moment.min.js')}}"></script>
   <script src='https://cdn.jsdelivr.net/npm/vue'></script>
   <script src='https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js'></script>
-  <script src="{{url_for('static', filename='js/events_tabel.js')}}"></script>
   <script>
     // variables declaration before init
     var app = undefined;
@@ -92,6 +91,10 @@
     {% endif %}
 	</script>
 
+  <script>
+    {% include 'events_tabel.js' %}
+  </script>
+
 {% endblock%}
 
 
@@ -108,17 +111,17 @@
 
     <div id='app'>
           <div class="card-group">
-            <div class="card p-4">
+            <div class="card p-4" style='background-color: #ffff00;'>
               <div class="card-body">
                 <p>Команда: [[team_name]].</p>
                 <p>У вас [[team_ap]] очков.</p>
                 <h1>Ваши действия?</h1>
                 <div v-for="action in actions" class="row">
                   <input v-bind:class="'btn btn-block btn-' + (action.cost < team_ap ? 'success' : 'danger') +' my-1'" type="button" v-on:click="push_action"
-                        v-bind:action_name="action.name" v-bind:action_cost="action.cost" v-bind:value="action.name + ' (' + action.cost.toString() + ' очков)'"/>
+                        v-bind:action_name="action.name" v-bind:action_cost="action.cost" v-bind:value="action.view_name + ' (' + action.cost.toString() + ' очков)'"/>
                 </div>
                 <div class="row">
-                    <input class="btn btn-block btn-primary my-1" type="button" onclick="window.location='/main';" value="Вернуться в основное меню"/>
+                    <input class="btn btn-block btn-dark my-1" type="button" onclick="window.location='/main';" value="Вернуться в основное меню"/>
                 </div>
                 </div>
             </div>

@@ -76,7 +76,7 @@
   <div class="row justify-content-center" id='app'>
     <div class="col-md-8">
       <div class="card-group">
-        <div class="card p-4">
+        <div class="card p-4" style='background-color: #ffff00;'>
           <div class="card-body">
             <div>
               <h1>Логин</h1>
@@ -91,10 +91,7 @@
               </div>
               <div class="row">
                 <div class="col-6">
-                  <button class="btn btn-primary px-4" type="button" v-on:click='login'>Войти</button>
-                </div>
-                <div class="col-6 text-right">
-                  <button class="btn btn-link px-0" type="button">Нет пароля?</button>
+                  <button class="btn btn-dark px-4" type="button" v-on:click='login'>Войти</button>
                 </div>
               </div>
             </div>
@@ -131,7 +128,7 @@
           <div class="modal-footer">
             <slot name="footer">
               <!-- default footer -->
-              <button class="modal-default-button btn btn-primary" @click="$emit('close')">
+              <button class="modal-default-button btn btn-dark" @click="$emit('close')">
                 OK
               </button>
             </slot>

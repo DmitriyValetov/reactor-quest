@@ -116,106 +116,59 @@ points_amount: 100
 plots_access:
   govs:
     time_series:
-      - name: state
-        name_ru: состояние
+      - state
     scalars:
-      - name: cur_step
-        name_ru: текущий шаг
-      - name: cur_timestamp
-        name_ru: текущее время
-      - name: state
-        name_ru: состояние
-      - name: rate
-        name_ru: степень
-      - name: chance
-        name_ru: шанс взрыва
-      - name: booms_cnt
-        name_ru: счетчик взрывов
-      - name: staff_cnt
-        name_ru: счет персонала
-      - name: govs_cnt
-        name_ru: счет правительства
-      - name: terrors_cnt
-        name_ru: счет террористов
-      - name: no_one_cnt
-        name_ru: хз что это
+      - cur_step
+      - cur_timestamp
+      - state
+      - rate
+      - chance
+      - booms_cnt
+      - staff_cnt
+      - govs_cnt
+      - terrors_cnt
+      - no_one_cnt
   terrors:
     time_series:
-      - name: state
-        name_ru: состояние
+      - state
     scalars:
-      - name: cur_step
-        name_ru: текущий шаг
-      - name: cur_timestamp
-        name_ru: текущее время 
-      - name: state
-        name_ru: состояние
-      - name: rate
-        name_ru: степень
-      - name: chance
-        name_ru: шанс взрыва
-      - name: booms_cnt
-        name_ru: было взрывов
-      - name: staff_cnt
-        name_ru: счет персонала
-      - name: govs_cnt
-        name_ru: счет правительства
-      - name: terrors_cnt
-        name_ru: счет террористов
-      - name: no_one_cnt
-        name_ru: хз что это
+      - cur_step
+      - cur_timestamp
+      - state
+      - rate
+      - chance
+      - booms_cnt
+      - staff_cnt
+      - govs_cnt
+      - terrors_cnt
+      - no_one_cnt
 
   staff:
     time_series:
-      - name: state
-        name_ru: состояние
+      - state
     scalars:
-      - name: cur_step
-        name_ru: текущий шаг
-      - name: cur_timestamp
-        name_ru: текущее время
-      - name: state
-        name_ru: состояние
-      - name: rate
-        name_ru: степнь
-      - name: chance
-        name_ru: шанс взрыва
-      - name: booms_cnt
-        name_ru: счетчик взрывов
-      - name: staff_cnt
-        name_ru: счет персонала
-      - name: govs_cnt
-        name_ru: счет правительства
-      - name: terrors_cnt
-        name_ru: счет террористов
-      - name: no_one_cnt
-        name_ru: хз что это
+      - cur_step
+      - cur_timestamp
+      - state
+      - rate
+      - chance
+      - booms_cnt
+      - staff_cnt
+      - govs_cnt
+      - terrors_cnt
+      - no_one_cnt
   admin:
     time_series:
-      - name: state
-        name_ru: 
-      - name: rate
-        name_ru: 
-      - name: cur_step
-        name_ru: 
+      - state
+      - rate
+      - cur_step
     scalars:
-      - name: cur_step
-        name_ru: текущий шаг
-      - name: cur_timestamp
-        name_ru: текущее время
-      - name: state
-        name_ru: состояние
-      - name: rate
-        name_ru: степнь
-      - name: chance
-        name_ru: шанс взрыва
-      - name: booms_cnt
-        name_ru: счетчик взрывов
-      - name: staff_cnt
-        name_ru: счет персонала
-      - name: govs_cnt
-        name_ru: счет правительства
-      - name: terrors_cnt
-        name_ru: счет террористов
-      - name: no_one_cnt
-        name_ru: хз что это
+      - cur_step
+      - cur_timestamp
+      - state
+      - rate
+      - chance
+      - booms_cnt
+      - staff_cnt
+      - terrors_cnt
+      - no_one_cnt
