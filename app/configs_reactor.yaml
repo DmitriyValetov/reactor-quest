@@ -5,7 +5,7 @@ reactor:
 run:
   dump_path: app/reactor.db  # path to db
   plot: yes  # plot reactor state
-  simulate: yes  # simulate teams actions
+  simulate: no  # simulate teams actions
   simulate_teams: null # which teams to simulate (null - simulate all, [] - no one)
   simulate_strats: ['staff_1', 'terrors_1', 'govs_1']  # teams strategies
   reset: yes  # reset db before or start from the last saved state

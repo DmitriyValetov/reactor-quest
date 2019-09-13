@@ -12,90 +12,90 @@ actions:
   name: reset
   name_ru: сброс
 - access: [staff]
-  cost: 1
+  cost: 10
   name: rod_up
   name_ru: поднять стрежни (+5 к мощности, быстро)
 - access: [staff]
-  cost: 1
+  cost: 10
   name: rod_down
   name_ru: опустить стрежни (-5 к мощности, быстро)
 - access: [staff]
-  cost: 1
+  cost: 5
   name: pump_up
   name_ru: увеличить расход рабочего тела (-5 к мощности, медленно)
 - access: [staff]
-  cost: 1
+  cost: 5
   name: pump_down
   name_ru: уменьшить расход рабочего тела (+5 к мощности, медленно)
 - access: [staff]
-  cost: 1
+  cost: 25
   name: boron
   name_ru: добавить бора в активную зону (-5 к мощности, очень быстро)
 - access: [staff]
-  cost: 1
+  cost: 100
   name: scram
   name_ru: АЗ-5
 - access: [staff]
-  cost: 1
+  cost: 150
   name: plant_inspection
   name_ru: Провести инспекцию на станции (50% что их действия не сработают)
 - access: [staff]
-  cost: 1
+  cost: 150
   name: bribe_govs
   name_ru: Подкупить чиновников (50% что их действия не сработают)
 #- access: [terrors]
 #  cost: 1
 #  name: replace_boron
 - access: [terrors]
-  cost: 1
+  cost: 250
   name: pump_blow_up
   name_ru: взорвать насос (+25 к мощности, быстро)
 - access: [terrors]
-  cost: 1
+  cost: 50
   name: pump_break
   name_ru: сломать насос (+25 к мощности, медленно)
 - access: [terrors]
-  cost: 1
+  cost: 300
   name: fire
   name_ru: устроить пожар (мощность блока падает до 0)
 - access: [terrors]
-  cost: 1
+  cost: 150
   name: virus
   name_ru: запустить вирус (мощность начинает случайно прыгать)
 - access: [terrors]
-  cost: 1
+  cost: 150
   name: poison_staff
   name_ru: травануть операторов (50% что их действия не сработают)
 - access: [terrors]
-  cost: 1
+  cost: 150
   name: insert_spy
   name_ru: внедрить шпиона в правительство (50% что их действия не сработают)
 - access: [govs]
-  cost: 1
+  cost: 5
   name: tip
   name_ru: съэкономить на стержнях (+5 к мощности, очень медленно)
 - access: [govs]
-  cost: 1
+  cost: 150
   name: anti_terrorist_operation
   name_ru: антитеррористическая операция (50% что их действия не сработают)
 - access: [govs]
-  cost: 1
+  cost: 150
   name: intimidate_staff
   name_ru: запугать персонал (50% что их действия не сработают)
 - access: [govs]
-  cost: 1
+  cost: 10
   name: bribe_chief_engineer_plus
   name_ru: подкупить главного инженера (+20 к мощности, медленно)
-- access: [govs]
-  cost: 1
+- access: [terrors]
+  cost: 10
   name: bribe_chief_engineer_minus
   name_ru: подкупить главного инженера (-20 к мощности, медленно)
 - access: [govs]
-  cost: 1
+  cost: 10
   name: press_operators
   name_ru: заставить станцию выдавать нагрузку (+5 к мощности, быстро)
 - access: [govs]
-  cost: 1
+  cost: 75
   name: hide_boom
   name_ru: скрыть аварию (-1 к счетчику аварий, повлияет на победные очки диверсантов)
 auth:
@@ -136,7 +136,7 @@ teams:
 
 pair_dashboard_with_controls: True
 stats_update_timeout: 1000 # milliseconds, default is 1000 milliseconds
-points_amount: 100
+points_amount: 25
 
 plots_access:
   govs:

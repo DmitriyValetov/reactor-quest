@@ -9,6 +9,12 @@ def state_range(reactor):
         reactor.no_one_cnt += 1
 
 
+def state_range_boom(reactor):
+    state_range(reactor)
+    # TODO
+
+
 counts_factory = {
     'state_range': state_range,
+    'state_range_boom': state_range_boom,
 }

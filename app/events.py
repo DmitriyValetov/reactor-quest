@@ -36,7 +36,7 @@ def reset(index, reactor):
 
 
 def iodine(index, reactor):
-    delta_state = -1
+    delta_state = -0.1
     delta_step = 1
     cur_step = reactor.cur_step
     start_step = reactor.events_start.setdefault(index, cur_step)
@@ -51,7 +51,7 @@ def iodine(index, reactor):
 
 
 def anti_terrorist_operation(index, reactor):
-    delta_step = 60
+    delta_step = 12
     cur_step = reactor.cur_step
     start_step = reactor.events_start.setdefault(index, cur_step)
     end_step = reactor.events_end.setdefault(index, start_step + delta_step)
@@ -72,7 +72,7 @@ def anti_terrorist_operation(index, reactor):
 
 
 def plant_inspection(index, reactor):
-    delta_step = 60
+    delta_step = 12
     cur_step = reactor.cur_step
     start_step = reactor.events_start.setdefault(index, cur_step)
     end_step = reactor.events_end.setdefault(index, start_step + delta_step)
@@ -93,7 +93,7 @@ def plant_inspection(index, reactor):
 
 
 def poison_staff(index, reactor):
-    delta_step = 60
+    delta_step = 12
     cur_step = reactor.cur_step
     start_step = reactor.events_start.setdefault(index, cur_step)
     end_step = reactor.events_end.setdefault(index, start_step + delta_step)
@@ -114,7 +114,7 @@ def poison_staff(index, reactor):
 
 
 def insert_spy(index, reactor):
-    delta_step = 60
+    delta_step = 12
     cur_step = reactor.cur_step
     start_step = reactor.events_start.setdefault(index, cur_step)
     end_step = reactor.events_end.setdefault(index, start_step + delta_step)
@@ -135,7 +135,7 @@ def insert_spy(index, reactor):
 
 
 def intimidate_staff(index, reactor):
-    delta_step = 60
+    delta_step = 12
     cur_step = reactor.cur_step
     start_step = reactor.events_start.setdefault(index, cur_step)
     end_step = reactor.events_end.setdefault(index, start_step + delta_step)
@@ -156,7 +156,7 @@ def intimidate_staff(index, reactor):
 
 
 def bribe_govs(index, reactor):
-    delta_step = 60
+    delta_step = 12
     cur_step = reactor.cur_step
     start_step = reactor.events_start.setdefault(index, cur_step)
     end_step = reactor.events_end.setdefault(index, start_step + delta_step)
@@ -177,12 +177,12 @@ def bribe_govs(index, reactor):
 
 
 def tip(index, reactor):
-    delta_state = 5
-    delta_step = 120
+    delta_state = 10
+    delta_step = 60
     cur_step = reactor.cur_step
     start_step = reactor.events_start.setdefault(index, cur_step)
     end_step = reactor.events_end.setdefault(index, start_step + delta_step)
-    if cur_step <= end_step and 0 < reactor.state < 50:
+    if cur_step <= end_step:
         d = exp_help_func(start_step, delta_step, cur_step, delta_state)
         reactor.state += d
     if cur_step >= end_step:
@@ -193,7 +193,7 @@ def tip(index, reactor):
 
 def boron(index, reactor):
     delta_state = -5
-    delta_step = 1
+    delta_step = 2
     cur_step = reactor.cur_step
     start_step = reactor.events_start.setdefault(index, cur_step)
     end_step = reactor.events_end.setdefault(index, start_step + delta_step)
@@ -356,7 +356,7 @@ def boom(index, reactor):
 
 def virus(index, reactor):
     delta_step = 15
-    delta_state = random.choice([-15, 15])
+    delta_state = random.random() * 15
     cur_step = reactor.cur_step
     start_step = reactor.events_start.setdefault(index, cur_step)
     end_step = reactor.events_end.setdefault(index, start_step + delta_step)
