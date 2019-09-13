@@ -108,20 +108,128 @@ promo:
   hesouam: 1000
 promos:
   govs:
-  - ap: 1000
-    name: beer
-  - ap: 1000
-    name: bee
+  - ap: 300
+    name: старт
+  - ap: 300
+    name: 83214
+  - ap: 300
+    name: ипркн
+  - ap: 300
+    name: 37938
+  - ap: 300
+    name: 30111975
+  - ap: 300
+    name: 20111103
+  - ap: 300
+    name: 03281979
+  - ap: 300
+    name: щербина
+  - ap: 300
+    name: 26041986
+  - ap: 300
+    name: 19570929
+  - ap: 300
+    name: хабиб
+  - ap: 300
+    name: хабибулин
+  - ap: 300
+    name: никулин
+  - ap: 300
+    name: бибаибоба
+  - ap: 300
+    name: жигадрыга
+  - ap: 300
+    name: косяк
+  - ap: 300
+    name: косяк2
+  - ap: 300
+    name: косяк3
+  - ap: 300
+    name: косяк4
+  - ap: 300
+    name: косяк5
   staff:
-  - ap: 1000
-    name: hesouam
-  - ap: 1000
-    name: love
+  - ap: 300
+    name: старт
+  - ap: 300
+    name: 83214
+  - ap: 300
+    name: иазсу
+  - ap: 300
+    name: 103520
+  - ap: 300
+    name: 30111975
+  - ap: 300
+    name: 20111103
+  - ap: 300
+    name: 03281979
+  - ap: 300
+    name: дятлов
+  - ap: 300
+    name: 26041986
+  - ap: 300
+    name: 19570929
+  - ap: 300
+    name: хабиб
+  - ap: 300
+    name: хабибулин
+  - ap: 300
+    name: никулин
+  - ap: 300
+    name: бибаибоба
+  - ap: 300
+    name: жигадрыга
+  - ap: 300
+    name: косяк
+  - ap: 300
+    name: косяк2
+  - ap: 300
+    name: косяк3
+  - ap: 300
+    name: косяк4
+  - ap: 300
+    name: косяк5
   terrors:
-  - ap: 1000
-    name: ibrae
-  - ap: 1000
-    name: mipt
+  - ap: 300
+    name: старт
+  - ap: 300
+    name: 83214
+  - ap: 300
+    name: итруч
+  - ap: 300
+    name: 103872
+  - ap: 300
+    name: 30111975
+  - ap: 300
+    name: 20111103
+  - ap: 300
+    name: 03281979
+  - ap: 300
+    name: путин
+  - ap: 300
+    name: 26041986
+  - ap: 300
+    name: 19570929
+  - ap: 300
+    name: хабиб
+  - ap: 300
+    name: хабибулин
+  - ap: 300
+    name: никулин
+  - ap: 300
+    name: бибаибоба
+  - ap: 300
+    name: жигадрыга
+  - ap: 300
+    name: косяк
+  - ap: 300
+    name: косяк2
+  - ap: 300
+    name: косяк3
+  - ap: 300
+    name: косяк4
+  - ap: 300
+    name: косяк5
   admin:
   - ap: 100500
     name: admin
@@ -135,7 +243,7 @@ teams:
 - admin
 
 pair_dashboard_with_controls: True
-stats_update_timeout: 1000 # milliseconds, default is 1000 milliseconds
+stats_update_timeout: 2500 # milliseconds, default is 1000 milliseconds
 points_amount: 25
 
 plots_access:
