@@ -71,7 +71,7 @@ actions:
   name: insert_spy
   name_ru: внедрить шпиона в правительство (50% что их действия не сработают)
 - access: [govs]
-  cost: 5
+  cost: 25
   name: tip
   name_ru: съэкономить на стержнях (+5 к мощности, очень медленно)
 - access: [govs]
@@ -140,13 +140,13 @@ promos:
     name: жигадрыга
   - ap: 300
     name: косяк
-  - ap: 300
+  - ap: 600
     name: косяк2
-  - ap: 300
+  - ap: 900
     name: косяк3
-  - ap: 300
+  - ap: 1200
     name: косяк4
-  - ap: 300
+  - ap: 5000
     name: косяк5
   staff:
   - ap: 300
@@ -181,13 +181,13 @@ promos:
     name: жигадрыга
   - ap: 300
     name: косяк
-  - ap: 300
+  - ap: 600
     name: косяк2
-  - ap: 300
+  - ap: 900
     name: косяк3
-  - ap: 300
+  - ap: 1200
     name: косяк4
-  - ap: 300
+  - ap: 5000
     name: косяк5
   terrors:
   - ap: 300
@@ -222,13 +222,13 @@ promos:
     name: жигадрыга
   - ap: 300
     name: косяк
-  - ap: 300
+  - ap: 600
     name: косяк2
-  - ap: 300
+  - ap: 900
     name: косяк3
-  - ap: 300
+  - ap: 1200
     name: косяк4
-  - ap: 300
+  - ap: 5000
     name: косяк5
   admin:
   - ap: 100500
@@ -243,7 +243,7 @@ teams:
 - admin
 
 pair_dashboard_with_controls: True
-stats_update_timeout: 2500 # milliseconds, default is 1000 milliseconds
+stats_update_timeout: 1000 # milliseconds, default is 1000 milliseconds
 points_amount: 25
 
 plots_access:
