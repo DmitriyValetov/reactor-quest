@@ -139,7 +139,8 @@ def translate(data):
 
 @reactor_blueprint.route('ajax/get_events', methods=['GET'])
 def get_events():
-    return json.dumps(translate(db.get_events(access=session['login'])))
+    return json.dumps({'events': translate(db.get_events(access=session['login'])), 
+            'cur_step': db.get_cur_step()})
 
 
 @reactor_blueprint.route('ajax/stop_event', methods=['GET'])

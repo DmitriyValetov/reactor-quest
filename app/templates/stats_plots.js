@@ -113,12 +113,12 @@ function UpdateAllCharts(chart_holder){
   function createOptions(title) {
     return {
       title: title,
-      hAxis: {
-          title: "Time"
-      },
-      vAxis: {
-          title: title
-      }
+      // hAxis: {
+      //     title: "Time"
+      // },
+      // vAxis: {
+      //     title: title
+      // }
     };
   }
     

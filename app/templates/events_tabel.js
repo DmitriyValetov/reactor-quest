@@ -21,7 +21,9 @@ $(document).ready(function() {
         $.get('ajax/stop_event', {'event_id': event_id}, post_process_stop_request)
     }
 
-    function build_events_table(events){
+    function build_events_table(events_cur_step){
+        var events = events_cur_step.events,
+            cur_step = events_cur_step.cur_step;
         events_table.empty();
         events.forEach(function(event_obj){
             if(event_obj.access){
@@ -29,6 +31,7 @@ $(document).ready(function() {
                     <tr id='${event_obj['id']}'>
                     <td>${event_obj['view_name']}</td>
                     <td>${event_obj['view_source']}</td>
+                    <td>${event_obj['end']-cur_step}</td>
                     <td><button id="${event_obj['id']}" class='btn btn-secondary'><i class="fa fa-times" aria-hidden="true"></i></button></td>
                     </tr>
                 `);
@@ -50,11 +53,11 @@ $(document).ready(function() {
 
 
     function run_events_table(){
-        fetchData(function(events){
+        fetchData(function(events_cur_step){
             /**
              * event: id, name, source, status(1)
              */
-            build_events_table(events);
+            build_events_table(events_cur_step);
             setTimeout(run_events_table, {{stats_update_timeout}});     
         });
     }

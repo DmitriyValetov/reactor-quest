@@ -8,7 +8,7 @@ import os
 this_root = os.path.split(__file__)[0]
 
 def load_yaml(path):
-    with open(file=path, mode='r') as f:
+    with open(file=path, mode='r', encoding='utf-8') as f:
         data = yaml.load(f)
     return data
 

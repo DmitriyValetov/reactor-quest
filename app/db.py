@@ -39,7 +39,8 @@ class Event(Base):
             'id': self.id,
             'name': data['name'],
             'source': data['source'],
-            'status': self.status
+            'status': self.status,
+            'end': self.end
         }
 
 class Team(Base):
@@ -234,6 +235,7 @@ def init(app):
             new_team = Team(name=team_name, ap=app.configs['init_ap'])
             if team_name in app.configs['promos']:
                 for promo_pack in app.configs['promos'][team_name]:
+                    print(promo_pack)
                     new_team.promos.append(Promo(name=promo_pack['name'], status='off', ap=promo_pack['ap']))
             session.add(new_team)
     session.commit()
@@ -295,6 +297,15 @@ def get_stats_by_parameter_name(parameter_name):
 def translate_one(word):
     from .translations import eng_ru
     return eng_ru[word] if word in eng_ru else word
+
+def get_cur_step():
+    engine = make_engine()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    state_data = yaml.load(session.query(State).order_by(State.id.desc()).first().data)
+    session.close()
+    engine.dispose()
+    return state_data.get('cur_step', 0)
 
 def get_stats_by_configs(configs, login):
     print(configs['plots_access'][login]['scalars'])
